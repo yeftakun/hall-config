@@ -1,0 +1,83 @@
+<Window x:Class="HallConfig.App.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About HallConfig"
+        Height="340" Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#0D1117"
+        Foreground="#E6EDF3"
+        FontFamily="Segoe UI"
+        WindowStyle="SingleBorderWindow">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header: Minimal & Clean -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="38" Height="38" CornerRadius="8" Background="#161B22" BorderBrush="#00D2FF" BorderThickness="1.5" Margin="0,0,12,0">
+                    <TextBlock Text="⚡" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#00D2FF"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="HallConfig" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF"/>
+                    <TextBlock Text="Version 1.0.0 (x64)" FontSize="11" Foreground="#8B949E"/>
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Text="Gamepad Hall-Effect Trigger &amp; Stick Signal Conditioner for vJoy."
+                       FontSize="12" Foreground="#C9D1D9" Margin="0,10,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Minimalist Info Box -->
+        <Border Grid.Row="1" Background="#161B22" BorderBrush="#21262D" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,16" VerticalAlignment="Center">
+            <StackPanel>
+                <!-- Creator Info -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Created by" FontSize="12" Foreground="#8B949E" Width="90"/>
+                    <TextBlock Grid.Column="1" Text="Yefta Asyel" FontSize="12" FontWeight="SemiBold" Foreground="#58A6FF"/>
+                </Grid>
+
+                <!-- Instagram -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Instagram" FontSize="12" Foreground="#8B949E" Width="90"/>
+                    <TextBlock Grid.Column="1" Text="@yefta_asyel" FontSize="12" FontWeight="SemiBold" Foreground="#FFAA00"/>
+                </Grid>
+
+                <!-- Target Engine -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Target" FontSize="12" Foreground="#8B949E" Width="90"/>
+                    <TextBlock Grid.Column="1" Text="vJoy • Assetto Corsa • PC Sim Racing" FontSize="12" Foreground="#8B949E"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="2">
+            <TextBlock Text="MIT License" VerticalAlignment="Center" FontSize="11" Foreground="#484F58"/>
+            <Button Content="Close" Width="80" Height="30" HorizontalAlignment="Right" Click="CloseButton_Click"
+                    Background="#238636" Foreground="#FFFFFF" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="6"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </DockPanel>
+    </Grid>
+</Window>

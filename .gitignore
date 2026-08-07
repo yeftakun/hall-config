@@ -1,0 +1,24 @@
+# Build & Publish outputs
+[Bb]in/
+[Oo]bj/
+publish/
+dist/
+
+# Visual Studio / Rider / VS Code files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Runtime generated configs & logs
+config.json
+*.log
+hallconfig-debug-*.log
+
+# NuGet
+*.nupkg
+**/packages/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
