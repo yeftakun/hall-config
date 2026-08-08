@@ -1,37 +1,40 @@
 # HallConfig 🏎️⚡
 
-A lightweight, ultra low-latency (~250 Hz) signal conditioning utility for Windows designed specifically for **Hall-Effect gamepad triggers and thumbsticks**. It eliminates the common 0–20% hardware deadzone flutter and signal blips before routing clean virtual joystick inputs to **vJoy** and racing simulators like **Assetto Corsa**.
+A lightweight, ultra low-latency (~250 Hz) signal conditioning utility for Windows designed specifically for **Hall-Effect gamepad triggers and thumbsticks**. It eliminates the common 0–20% hardware deadzone flutter and signal blips before routing clean virtual controller inputs via **Virtual Xbox 360 (ViGEmBus / XInput)** or **vJoy (DirectInput)** to racing simulators like **Assetto Corsa**.
 
 ---
 
 ## 🚀 Key Features
 
 - **250 Hz Precision Pipeline**: Real-time XInput polling and processing with minimal CPU overhead (~0.1%).
+- **Dual Output Emulation Modes**:
+  - 🎮 **Virtual Xbox 360 (ViGEmBus)**: Native XInput output with genuine 1:1 trigger sensitivity curves for Assetto Corsa and modern games.
+  - 🕹️ **vJoy Device #1 (DirectInput)**: Classic generic joystick emulation for broad backward compatibility.
 - **Dual Signal Filter Engine**:
   - **EMA Smoothing**: Exponential Moving Average filter to eliminate micro-jitter.
   - **Schmitt-Trigger Hysteresis**: True threshold-up / threshold-down hysteresis cutoff that completely silences rest-position sensor noise.
-- **Simultaneous 4-Axis vJoy Routing**:
-  - 🎮 **Axle 1 (`X`)**: Joystick L Horizontal *(Center neutral 50%)*
-  - 🎮 **Axle 2 (`Y`)**: Right Trigger / Throttle *(0% – 100%)*
-  - 🎮 **Axle 3 (`Z`)**: Left Trigger / Brake *(0% – 100%)*
-  - 🎮 **Axle 4 (`Rx`)**: Joystick L Vertical *(Center neutral 50%)*
+- **Simultaneous 4-Axis Mapping**:
+  - 🎮 **Left Stick X**: Steering *(Center neutral 50%)*
+  - 🎮 **Right Trigger (RT)**: Throttle *(0% – 100%)*
+  - 🎮 **Left Trigger (LT)**: Brake *(0% – 100%)*
+  - 🎮 **Left Stick Y**: Pitch / Handbrake *(Center neutral 50%)*
 - **Per-Axis Independent Tuning**: Tune Alpha, Threshold Up, and Threshold Down per individual axis with live visual feedback.
 - **Interactive Modern Dark UI**: Dynamic visual meters for both RAW and OUTPUT signals for all 4 axes simultaneously.
 - **Production Polish**:
   - System Tray integration (minimize-to-tray & close-to-tray).
   - Windows Run on Startup (`--minimized`) support with instant auto-start.
-  - Standalone Single-File self-contained executable.
+  - Standalone Single-File self-contained executable & Inno Setup installer.
 
 ---
 
 ## 📦 Requirements & Installation
 
 1. **Windows 10 / 11 (64-bit)**
-2. **vJoy Virtual Joystick Driver (v2.1.9+)**:
-   - Download and install vJoy from [SourceForge](https://sourceforge.net/projects/vjoysoft/) or [GitHub vJoy releases](https://github.com/shauleiz/vJoy/releases).
-   - Ensure **vJoy Device #1** is enabled in `vJoyConf.exe` with Axes: `X`, `Y`, `Z`, `Rx`.
-3. **Download HallConfig**:
-   - Run `publish\HallConfig.App.exe` directly (no .NET runtime installation required).
+2. **Virtual Controller Driver (Pilih salah satu atau keduanya)**:
+   - **ViGEmBus (Rekomendasi)**: Diperlukan untuk mode Virtual Xbox 360. Unduh installer resmi dari [ViGEmBus Releases](https://github.com/nefarius/ViGEmBus/releases).
+   - **vJoy (v2.1.9+)**: Diperlukan jika menggunakan mode vJoy. Unduh dari [GitHub vJoy releases](https://github.com/shauleiz/vJoy/releases).
+3. **Download & Run**:
+   - Jalankan `dist\HallConfig_Setup_v1.1.0.exe` untuk menginstall, atau jalankan langsung `publish\HallConfig.App.exe` (standalone portable).
 
 ---
 
@@ -103,8 +106,13 @@ hall-config/
 │   │   └── Services/TrayService.cs
 │   └── HallConfig.DevConsole/    # CLI diagnostics & live HUD tool
 └── tests/
-    └── HallConfig.Core.Tests/    # 14 comprehensive unit tests
+    └── HallConfig.Core.Tests/    # 23 comprehensive unit tests
 ```
+
+---
+
+## 📜 Changelog
+Lihat riwayat rilis dan catatan pembaruan lengkap di [change_log.md](file:///d:/code/hall-config/change_log.md).
 
 ---
 
