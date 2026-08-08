@@ -1,120 +1,89 @@
-# HallConfig 🏎️⚡
+# HallConfig
 
-A lightweight, ultra low-latency (~250 Hz) signal conditioning utility for Windows designed specifically for **Hall-Effect gamepad triggers and thumbsticks**. It eliminates the common 0–20% hardware deadzone flutter and signal blips before routing clean virtual controller inputs via **Virtual Xbox 360 (ViGEmBus / XInput)** or **vJoy (DirectInput)** to racing simulators like **Assetto Corsa**.
+[ID](/README-ID.md) | EN
 
----
+**Smoother Inputs. Cleaner Trailbraking.**
 
-## 🚀 Key Features
+A Windows desktop app that smooths out gamepad trigger/stick signals from hall-effect controllers that stutter/jitter at low input ranges (a common hardware deadzone issue) — before passing them to your game. Built specifically for clean trailbraking in sim racing (Assetto Corsa).
 
-- **250 Hz Precision Pipeline**: Real-time XInput polling and processing with minimal CPU overhead (~0.1%).
-- **Dual Output Emulation Modes**:
-  - 🎮 **Virtual Xbox 360 (ViGEmBus)**: Native XInput output with genuine 1:1 trigger sensitivity curves for Assetto Corsa and modern games.
-  - 🕹️ **vJoy Device #1 (DirectInput)**: Classic generic joystick emulation for broad backward compatibility.
-- **Dual Signal Filter Engine**:
-  - **EMA Smoothing**: Exponential Moving Average filter to eliminate micro-jitter.
-  - **Schmitt-Trigger Hysteresis**: True threshold-up / threshold-down hysteresis cutoff that completely silences rest-position sensor noise.
-- **Simultaneous 4-Axis Mapping**:
-  - 🎮 **Left Stick X**: Steering *(Center neutral 50%)*
-  - 🎮 **Right Trigger (RT)**: Throttle *(0% – 100%)*
-  - 🎮 **Left Trigger (LT)**: Brake *(0% – 100%)*
-  - 🎮 **Left Stick Y**: Pitch / Handbrake *(Center neutral 50%)*
-- **Per-Axis Independent Tuning**: Tune Alpha, Threshold Up, and Threshold Down per individual axis with live visual feedback.
-- **Interactive Modern Dark UI**: Dynamic visual meters for both RAW and OUTPUT signals for all 4 axes simultaneously.
-- **Production Polish**:
-  - System Tray integration (minimize-to-tray & close-to-tray).
-  - Windows Run on Startup (`--minimized`) support with instant auto-start.
-  - Standalone Single-File self-contained executable & Inno Setup installer.
+![ss](assets\banner.webp)
 
----
+## What Is This?
 
-## 📦 Requirements & Installation
+Some hall-effect trigger controllers have a "blind"/unstable zone at low pressure ranges (e.g. 0–20%), causing input to blip/stutter during trailbraking. HallConfig reads that raw signal, cleans it up, and sends the result to your game through a virtual controller — no hardware replacement needed.
 
-1. **Windows 10 / 11 (64-bit)**
-2. **Virtual Controller Driver (Pilih salah satu atau keduanya)**:
-   - **ViGEmBus (Rekomendasi)**: Diperlukan untuk mode Virtual Xbox 360. Unduh installer resmi dari [ViGEmBus Releases](https://github.com/nefarius/ViGEmBus/releases).
-   - **vJoy (v2.1.9+)**: Diperlukan jika menggunakan mode vJoy. Unduh dari [GitHub vJoy releases](https://github.com/shauleiz/vJoy/releases).
-3. **Download & Run**:
-   - Jalankan `dist\HallConfig_Setup_v1.1.0.exe` untuk menginstall, atau jalankan langsung `publish\HallConfig.App.exe` (standalone portable).
-
----
-
-## 🎮 Setup Guide for Assetto Corsa & Sim Racing
-
-### 1. Configure HallConfig
-1. Open **HallConfig.App.exe**.
-2. Click **Start Pipeline**.
-3. Select an axis (e.g. **Right Trigger** or **Left Trigger**) to adjust smoothing and hysteresis sliders as needed.
-4. Click **Save Config** to persist your profile to `%LocalAppData%\HallConfig\config.json`.
-
-### 2. Bind Controls in Assetto Corsa (or Content Manager)
-1. Open **Assetto Corsa** ➔ **Options** ➔ **Controls** (or Content Manager ➔ **Settings** ➔ **Assetto Corsa** ➔ **Controls**).
-2. Set input type to **Wheel / Custom** (or DirectInput Controllers).
-3. Assign the axes:
-   - **Steering**: Move Left Stick horizontally ➔ Assigns to `vJoy Device - Axle 1`
-   - **Throttle**: Press Right Trigger ➔ Assigns to `vJoy Device - Axle 2`
-   - **Brakes**: Press Left Trigger firmly & quickly ➔ Assigns to `vJoy Device - Axle 3`
-
-### 3. Best Practice: Controller Isolation with HidHide (Recommended)
-Because Windows detects both your physical Xbox gamepad and the virtual vJoy Device, some games might bind the physical controller instead.
-To completely prevent double-input:
-1. Download **[Nefarius HidHide](https://github.com/nefarius/HidHide)**.
-2. In the **Applications** tab of HidHide, add `HallConfig.App.exe` to the whitelist.
-3. In the **Devices** tab, hide your physical controller from other games.
-4. Now games will **only see vJoy Device**, giving you 100% clean, flutter-free control!
-
----
-
-## 🛠️ Building & Publishing from Source
-
-### Prerequisites:
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-### Build Solution:
-```powershell
-dotnet build
-```
-
-### Run Unit Tests:
-```powershell
-dotnet test
-```
-
-### Publish Standalone Single-File Release:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\publish.ps1
-```
-The output executable will be created in `./publish/HallConfig.App.exe`.
-
----
-
-## 📂 Project Architecture
+## How It Works (Brief)
 
 ```
-hall-config/
-├── libs/x64/                     # Native vJoy C/C++ SDK & managed wrapper
-├── src/
-│   ├── HallConfig.Core/          # Pure signal pipeline & algorithms (Unit-tested)
-│   │   ├── SignalProcessor.cs    # EMA smoothing & Schmitt hysteresis logic
-│   │   ├── InputReader.cs        # XInput 1.4 low-latency reader
-│   │   ├── VJoyOutput.cs         # vJoy SDK multi-axis dispatcher
-│   │   ├── PipelineEngine.cs     # 250Hz dedicated worker thread
-│   │   ├── ConfigStore.cs        # JSON settings serializer
-│   │   └── Services/StartupHelper.cs
-│   ├── HallConfig.App/           # WPF MVVM GUI & System Tray application
-│   │   ├── MainWindow.xaml       # Interactive 4-axis dashboard
-│   │   ├── Views/AboutWindow.xaml
-│   │   └── Services/TrayService.cs
-│   └── HallConfig.DevConsole/    # CLI diagnostics & live HUD tool
-└── tests/
-    └── HallConfig.Core.Tests/    # 23 comprehensive unit tests
+Physical controller (XInput)
+      ↓
+[Read raw trigger/stick]
+      ↓
+[Signal Processor: Smoothing + Hysteresis Deadzone]
+      ↓
+[Output to virtual controller: vJoy or Xbox 360 (ViGEm)]
+      ↓
+Game (Assetto Corsa, etc.)
 ```
 
+Buttons, D-pad, and Right Stick are passed through directly (unprocessed) — signal processing only applies to the axes that need it (triggers & left stick).
+
+## Key Features
+
+- **Dual output mode** — output as a vJoy device or a virtual Xbox 360 controller (ViGEm). Xbox 360 is recommended, as the sensitivity curve games read from it tends to feel more natural than vJoy's.
+- **Per-axis independent config** — Right Trigger, Left Trigger, Left Stick X/Y each have their own smoothing and hysteresis settings.
+- **Live monitoring** — real-time raw vs. output graph right in the app while you tune.
+- **Save/Load presets** — save your configuration to a file, load it back anytime.
+
+## Setup
+
+### 1. Install an output driver (pick one, matching the mode you'll use)
+
+- **Xbox 360 (ViGEm)** — *recommended*. Install **ViGEmBus** from [github.com/ViGEm/ViGEmBus/releases](https://github.com/ViGEm/ViGEmBus/releases).
+- **vJoy** — install from [sourceforge.net/projects/vjoystick](https://sourceforge.net/projects/vjoystick/), then open `vJoyConf` and make sure at least 1 device is enabled.
+
+### 2. (Optional, recommended) Install HidHide
+
+So your physical controller doesn't also get read by the game alongside the virtual one — prevents binding the wrong device by mistake.
+
+1. Download from [github.com/nefarius/HidHide/releases](https://github.com/nefarius/HidHide/releases), install it.
+2. Open **HidHide Configuration Client**:
+   - **Applications** tab → add `HallConfig.App.exe`.
+   - **Devices** tab → check your physical controller, then check **Enable device hiding** at the bottom.
+3. Unplug and replug your physical controller for the change to take effect.
+
+### 3. Install HallConfig
+
+Download the latest installer from [Releases](https://github.com/yeftakun/hall-config/releases), run it, and follow the wizard.
+
+## How to Use
+
+Open HallConfig, pick the **Axis Source** (RT/LT/LX/LY) you want to tune, then adjust:
+
+| Term | Meaning |
+|---|---|
+| **Smoothing (α / alpha)** | Dampens noise in the raw signal via a moving average. Higher alpha = more responsive but less smooth; lower alpha = smoother but with slightly more delay. |
+| **Hysteresis** | A deadzone mechanism with two separate thresholds for rising (`Threshold Up`) and falling (`Threshold Down`) — prevents the signal from "blipping" back and forth when it hovers right around the deadzone point. |
+| **Threshold Up** | The raw value must cross this before output starts being considered "active" (above 0). |
+| **Threshold Down** | The raw value must drop below this for output to return to 0. Always lower than Threshold Up. |
+| **Output Mode** | Where the processed signal goes: **Xbox 360 (ViGEm)** or **vJoy**. |
+| **Start/Stop Pipeline** | Turns the read-process-write loop on/off. The virtual controller only exists while the pipeline is running. |
+| **Rate** | Processing loop speed (target ~250Hz) — a performance health indicator, not a UI render rate. |
+
+Smoothing and hysteresis can each be toggled independently per axis, so you can A/B test the feel directly in-game.
+
+## Requirements
+
+Windows 10/11, an XInput-compatible controller (Xbox 360/One/generic).
+
+## Known Limitation
+
+Without HidHide, both the physical and virtual controllers get read by the game at the same time (they don't conflict, but you can accidentally bind the wrong one) — see the [Setup](#2-optional-recommended-install-hidhide) section above.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
 ---
 
-## 📜 Changelog
-Lihat riwayat rilis dan catatan pembaruan lengkap di [change_log.md](file:///d:/code/hall-config/change_log.md).
-
----
-
-## 📄 License
-MIT License. Created with Google DeepMind Antigravity.
+*made by Yefta Asyel*
