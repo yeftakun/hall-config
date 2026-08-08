@@ -60,6 +60,8 @@ So your physical controller doesn't also get read by the game alongside the virt
 
 Open HallConfig, pick the **Axis Source** (RT/LT/LX/LY) you want to tune, then adjust:
 
+| Part | About |
+|---|---|
 | **Smoothing (α / alpha)** | Dampens noise in the raw signal via a moving average. Higher alpha = more responsive but less smooth; lower alpha = smoother but with slightly more delay. |
 | **Hysteresis** | A deadzone mechanism with two separate thresholds for rising (`Threshold Up`) and falling (`Threshold Down`) — prevents the signal from "blipping" back and forth when it hovers right around the deadzone point. |
 | **Threshold Up** | The raw value must cross this before output starts being considered "active" (above 0). |

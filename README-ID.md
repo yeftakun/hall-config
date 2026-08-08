@@ -60,6 +60,8 @@ Biar controller fisik nggak ikut kebaca game bareng controller virtual — jadi 
 
 Buka HallConfig, pilih **Axis Source** (RT/LT/LX/LY) yang mau di-tuning, terus atur:
 
+| Bagian | Ket |
+|---|---|
 | **Smoothing (α / alpha)** | Ngeredam noise di sinyal mentah pakai rata-rata bergerak. Alpha makin gede, makin responsif tapi kurang halus; alpha makin kecil, makin halus tapi ada sedikit delay. |
 | **Hysteresis** | Mekanisme deadzone dengan dua ambang batas beda buat naik (`Threshold Up`) dan turun (`Threshold Down`) — biar sinyal nggak "ngeblip" bolak-balik pas nilainya lagi pas-pasan di sekitar titik deadzone. |
 | **Threshold Up** | Nilai mentah harus lewat ini dulu baru output mulai dianggap "aktif" (di atas 0). |
