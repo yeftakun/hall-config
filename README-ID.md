@@ -42,7 +42,11 @@ Tombol, D-pad, dan Right Stick diteruskan langsung apa adanya (*passthrough*) �
 - **Xbox 360 (ViGEm)** — *disaranin*. Install **ViGEmBus** dari [github.com/ViGEm/ViGEmBus/releases](https://github.com/ViGEm/ViGEmBus/releases).
 - **vJoy** — install dari [sourceforge.net/projects/vjoystick](https://sourceforge.net/projects/vjoystick/), terus buka `vJoyConf` dan pastiin minimal 1 device aktif.
 
-### 2. (Opsional, tapi disaranin) Install HidHide
+### 2. Install HallConfig
+
+Download installer terbaru dari [Releases](https://github.com/yeftakun/hall-config/releases), jalanin, ikutin aja wizard-nya.
+
+### 3. (Opsional, tapi disaranin) Install HidHide
 
 Biar controller fisik nggak ikut kebaca game bareng controller virtual — jadi nggak salah bind axis pas main.
 
@@ -51,10 +55,6 @@ Biar controller fisik nggak ikut kebaca game bareng controller virtual — jadi 
    - Tab **Applications** → tambahin `HallConfig.App.exe`.
    - Tab **Devices** → centang controller fisik kamu, terus centang **Enable device hiding** di bawah.
 3. Cabut-pasang lagi controller fisiknya biar perubahannya kepakai.
-
-### 3. Install HallConfig
-
-Download installer terbaru dari [Releases](https://github.com/yeftakun/hall-config/releases), jalanin, ikutin aja wizard-nya.
 
 ## Cara Pakai
 

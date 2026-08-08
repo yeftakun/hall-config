@@ -42,7 +42,11 @@ Buttons, D-pad, and Right Stick are passed through directly (unprocessed) — si
 - **Xbox 360 (ViGEm)** — *recommended*. Install **ViGEmBus** from [github.com/ViGEm/ViGEmBus/releases](https://github.com/ViGEm/ViGEmBus/releases).
 - **vJoy** — install from [sourceforge.net/projects/vjoystick](https://sourceforge.net/projects/vjoystick/), then open `vJoyConf` and make sure at least 1 device is enabled.
 
-### 2. (Optional, recommended) Install HidHide
+### 2. Install HallConfig
+
+Download the latest installer from [Releases](https://github.com/yeftakun/hall-config/releases), run it, and follow the wizard.
+
+### 3. (Optional, recommended) Install HidHide
 
 So your physical controller doesn't also get read by the game alongside the virtual one — prevents binding the wrong device by mistake.
 
@@ -51,10 +55,6 @@ So your physical controller doesn't also get read by the game alongside the virt
    - **Applications** tab → add `HallConfig.App.exe`.
    - **Devices** tab → check your physical controller, then check **Enable device hiding** at the bottom.
 3. Unplug and replug your physical controller for the change to take effect.
-
-### 3. Install HallConfig
-
-Download the latest installer from [Releases](https://github.com/yeftakun/hall-config/releases), run it, and follow the wizard.
 
 ## How to Use
 
