@@ -6,7 +6,7 @@
 
 A Windows desktop app that smooths out gamepad trigger/stick signals from hall-effect controllers that stutter/jitter at low input ranges (a common hardware deadzone issue) — before passing them to your game. Built specifically for clean trailbraking in sim racing (Assetto Corsa).
 
-![ss](assets\banner.webp)
+![ss](assets/banner.webp)
 
 ## What Is This?
 

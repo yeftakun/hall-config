@@ -6,7 +6,7 @@ ID | [EN](/README.md)
 
 Aplikasi desktop Windows buat memperhalus sinyal trigger/stick gamepad hall-effect yang suka stutter/jitter di rentang input rendah (deadzone hardware), sebelum masuk ke game — dibuat khusus buat trailbraking yang mulus di sim racing (Assetto Corsa).
 
-![ss](assets\banner.webp)
+![ss](assets/banner.webp)
 
 ## Ini Apa?
 
