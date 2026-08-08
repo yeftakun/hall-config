@@ -218,11 +218,13 @@ public class PipelineEngine : IDisposable
                 loopIteration++;
                 Interlocked.Increment(ref _workerIterationCount);
 
-                // --- Read all 4 axes with 1 single XInput syscall ---
+                // --- Read all gamepad inputs with 1 single XInput syscall ---
                 float rawRT = 0f, rawLT = 0f, rawLX = 0.5f, rawLY = 0.5f;
+                short rawRX = 0, rawRY = 0;
+                ushort rawButtons = 0;
                 try
                 {
-                    _inputReader.ReadAllAxes(_config.DeviceIndex, out rawRT, out rawLT, out rawLX, out rawLY);
+                    _inputReader.ReadAllInputs(_config.DeviceIndex, out rawRT, out rawLT, out rawLX, out rawLY, out rawRX, out rawRY, out rawButtons);
                 }
                 catch (Exception ex)
                 {
@@ -230,7 +232,7 @@ public class PipelineEngine : IDisposable
                     if (now - lastReadErrorMs > 1000)
                     {
                         lastReadErrorMs = now;
-                        WriteLog($"[EXCEPTION ReadAllAxes] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                        WriteLog($"[EXCEPTION ReadAllInputs] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
                     }
                 }
 
@@ -269,12 +271,12 @@ public class PipelineEngine : IDisposable
                     _                     => procRT.IsActive
                 };
 
-                // --- Write all axes to active Output Device ---
+                // --- Write all axes, right stick, and buttons to active Output Device in a single atomic report ---
                 if (_outputDevice.IsAcquired)
                 {
                     try
                     {
-                        _outputDevice.UpdateAllAxes(processedLX, processedLY, processedLT, processedRT);
+                        _outputDevice.UpdateFullState(processedLX, processedLY, processedLT, processedRT, rawRX, rawRY, rawButtons);
                     }
                     catch (Exception ex)
                     {
@@ -282,7 +284,7 @@ public class PipelineEngine : IDisposable
                         if (now - lastOutputErrorMs > 1000)
                         {
                             lastOutputErrorMs = now;
-                            WriteLog($"[EXCEPTION UpdateAllAxes] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                            WriteLog($"[EXCEPTION UpdateFullState] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
                         }
                     }
                 } 

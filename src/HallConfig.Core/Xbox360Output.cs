@@ -129,6 +129,11 @@ public class Xbox360Output : IOutputDevice
 
     public bool UpdateAllAxes(float lx, float ly, float lt, float rt)
     {
+        return UpdateFullState(lx, ly, lt, rt, 0, 0, 0);
+    }
+
+    public bool UpdateFullState(float lx, float ly, float lt, float rt, short rawRx, short rawRy, ushort buttons)
+    {
         if (!_isAcquired || _controller == null) return false;
 
         try
@@ -137,7 +142,7 @@ public class Xbox360Output : IOutputDevice
             byte ltVal = (byte)Math.Clamp((int)Math.Round(lt * 255f), 0, 255);
             byte rtVal = (byte)Math.Clamp((int)Math.Round(rt * 255f), 0, 255);
 
-            // Thumbsticks: 0.0 -> -32768, 0.5 -> 0, 1.0 -> 32767
+            // Left Stick: 0.0 -> -32768, 0.5 -> 0, 1.0 -> 32767
             short lxVal = (short)Math.Clamp((int)Math.Round((lx * 65535f) - 32768f), -32768, 32767);
             short lyVal = (short)Math.Clamp((int)Math.Round((ly * 65535f) - 32768f), -32768, 32767);
 
@@ -145,6 +150,30 @@ public class Xbox360Output : IOutputDevice
             _controller.SetSliderValue(Xbox360Slider.RightTrigger, rtVal);
             _controller.SetAxisValue(Xbox360Axis.LeftThumbX, lxVal);
             _controller.SetAxisValue(Xbox360Axis.LeftThumbY, lyVal);
+
+            // Right Stick: Passthrough raw short without SignalProcessor
+            _controller.SetAxisValue(Xbox360Axis.RightThumbX, rawRx);
+            _controller.SetAxisValue(Xbox360Axis.RightThumbY, rawRy);
+
+            // Buttons & D-Pad: Direct passthrough of XInput bitmask
+            _controller.SetButtonState(Xbox360Button.A, (buttons & 0x1000) != 0);
+            _controller.SetButtonState(Xbox360Button.B, (buttons & 0x2000) != 0);
+            _controller.SetButtonState(Xbox360Button.X, (buttons & 0x4000) != 0);
+            _controller.SetButtonState(Xbox360Button.Y, (buttons & 0x8000) != 0);
+
+            _controller.SetButtonState(Xbox360Button.LeftShoulder, (buttons & 0x0100) != 0);
+            _controller.SetButtonState(Xbox360Button.RightShoulder, (buttons & 0x0200) != 0);
+
+            _controller.SetButtonState(Xbox360Button.Start, (buttons & 0x0010) != 0);
+            _controller.SetButtonState(Xbox360Button.Back, (buttons & 0x0020) != 0);
+
+            _controller.SetButtonState(Xbox360Button.LeftThumb, (buttons & 0x0040) != 0);
+            _controller.SetButtonState(Xbox360Button.RightThumb, (buttons & 0x0080) != 0);
+
+            _controller.SetButtonState(Xbox360Button.Up, (buttons & 0x0001) != 0);
+            _controller.SetButtonState(Xbox360Button.Down, (buttons & 0x0002) != 0);
+            _controller.SetButtonState(Xbox360Button.Left, (buttons & 0x0004) != 0);
+            _controller.SetButtonState(Xbox360Button.Right, (buttons & 0x0008) != 0);
 
             _controller.SubmitReport();
             return true;
@@ -165,6 +194,25 @@ public class Xbox360Output : IOutputDevice
             _controller.SetSliderValue(Xbox360Slider.RightTrigger, 0);
             _controller.SetAxisValue(Xbox360Axis.LeftThumbX, 0);
             _controller.SetAxisValue(Xbox360Axis.LeftThumbY, 0);
+            _controller.SetAxisValue(Xbox360Axis.RightThumbX, 0);
+            _controller.SetAxisValue(Xbox360Axis.RightThumbY, 0);
+
+            // Clear all buttons
+            _controller.SetButtonState(Xbox360Button.A, false);
+            _controller.SetButtonState(Xbox360Button.B, false);
+            _controller.SetButtonState(Xbox360Button.X, false);
+            _controller.SetButtonState(Xbox360Button.Y, false);
+            _controller.SetButtonState(Xbox360Button.LeftShoulder, false);
+            _controller.SetButtonState(Xbox360Button.RightShoulder, false);
+            _controller.SetButtonState(Xbox360Button.Start, false);
+            _controller.SetButtonState(Xbox360Button.Back, false);
+            _controller.SetButtonState(Xbox360Button.LeftThumb, false);
+            _controller.SetButtonState(Xbox360Button.RightThumb, false);
+            _controller.SetButtonState(Xbox360Button.Up, false);
+            _controller.SetButtonState(Xbox360Button.Down, false);
+            _controller.SetButtonState(Xbox360Button.Left, false);
+            _controller.SetButtonState(Xbox360Button.Right, false);
+
             _controller.SubmitReport();
         }
         catch { }

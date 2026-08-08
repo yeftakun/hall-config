@@ -34,6 +34,14 @@ public interface IOutputDevice : IDisposable
     bool UpdateAllAxes(float lx, float ly, float lt, float rt);
 
     /// <summary>
+    /// Updates all controller inputs in a single atomic report:
+    /// - 4 primary conditioned axes (LX, LY, LT, RT)
+    /// - Raw passthrough right stick (rawRx, rawRy in native short -32768..32767)
+    /// - Raw passthrough buttons bitmask (XInput ushort bitmask: A, B, X, Y, LB, RB, Start, Back, LS, RS, D-Pad)
+    /// </summary>
+    bool UpdateFullState(float lx, float ly, float lt, float rt, short rawRx, short rawRy, ushort buttons);
+
+    /// <summary>
     /// Resets all axes to neutral rest positions (triggers to 0, sticks to neutral center).
     /// </summary>
     void ResetToCenter();

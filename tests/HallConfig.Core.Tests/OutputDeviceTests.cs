@@ -47,10 +47,37 @@ public class OutputDeviceTests
     public void Xbox360Output_WhenNotAcquired_ReturnsFalseGracefully()
     {
         using var xbox = new Xbox360Output();
-        // Without acquiring, SetAxisValue and UpdateAllAxes should return false safely without throwing
+        // Without acquiring, SetAxisValue, UpdateAllAxes, and UpdateFullState should return false safely without throwing
         Assert.False(xbox.IsAcquired);
         Assert.False(xbox.SetAxisValue("RT", 0.75f));
         Assert.False(xbox.UpdateAllAxes(0.5f, 0.5f, 0.0f, 0.0f));
+        Assert.False(xbox.UpdateFullState(0.5f, 0.5f, 0.0f, 0.0f, 1000, -1000, 0x1000));
+    }
+
+    [Fact]
+    public void VJoyOutput_WhenNotAcquired_ReturnsFalseGracefully()
+    {
+        using var vjoy = new VJoyOutput(1, VJoyAxisType.X);
+        Assert.False(vjoy.IsAcquired);
+        Assert.False(vjoy.UpdateFullState(0.5f, 0.5f, 0.0f, 0.0f, 1000, -1000, 0x1000));
+    }
+
+    [Fact]
+    public void InputReader_ReadAllInputs_HandlesDisconnectedController()
+    {
+        using var reader = new InputReader();
+        // Slot 3 is almost certainly disconnected
+        bool ok = reader.ReadAllInputs(3, out float rt, out float lt, out float lx, out float ly, out short rx, out short ry, out ushort buttons);
+        if (!ok)
+        {
+            Assert.Equal(0f, rt);
+            Assert.Equal(0f, lt);
+            Assert.Equal(0.5f, lx);
+            Assert.Equal(0.5f, ly);
+            Assert.Equal(0, rx);
+            Assert.Equal(0, ry);
+            Assert.Equal(0, buttons);
+        }
     }
 
     [Fact]

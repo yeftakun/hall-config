@@ -2,9 +2,9 @@
 ; Inno Setup 6 Script (.iss)
 
 #define MyAppName "HallConfig"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Yefta Asyel"
-#define MyAppURL "https://instagram.com/yefta_asyel"
+#define MyAppURL "https://github.com/yeftakun/hall-config"
 #define MyAppExeName "HallConfig.App.exe"
 
 [Setup]
@@ -27,7 +27,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; Output Configuration
 OutputDir=dist
 OutputBaseFilename=HallConfig_Setup_v{#MyAppVersion}
-SetupIconFile=src\HallConfig.App\Assets\app.ico
+SetupIconFile=assets\icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 ; Compression & Modern Wizard Styling
@@ -49,13 +49,15 @@ Name: "runonstartup"; Description: "Run HallConfig automatically when Windows st
 Source: "publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "publish\vJoyInterface.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "publish\vJoyInterfaceWrap.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\HallConfig.App\Assets\app.ico"; DestDir: "{app}\Assets"; Flags: ignoreversion
+Source: "assets\icon.ico"; DestDir: "{app}\Assets"; Flags: ignoreversion
+Source: "assets\icon.png"; DestDir: "{app}\Assets"; Flags: ignoreversion
+Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\app.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\icon.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\app.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\icon.ico"; Tasks: desktopicon
 
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HallConfig"; ValueData: """{app}\{#MyAppExeName}"" --minimized"; Flags: uninsdeletevalue; Tasks: runonstartup

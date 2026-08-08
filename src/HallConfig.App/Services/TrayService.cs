@@ -37,7 +37,12 @@ public class TrayService : IDisposable
         // Load application icon
         try
         {
-            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "app.ico");
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "icon.ico");
+            if (!File.Exists(iconPath))
+            {
+                iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "app.ico");
+            }
+
             if (File.Exists(iconPath))
             {
                 _notifyIcon.Icon = new Icon(iconPath);

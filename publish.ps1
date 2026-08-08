@@ -41,6 +41,13 @@ if (Test-Path $vjoyWrapSrc) {
     Copy-Item $vjoyWrapSrc -Destination $publishDir -Force
 }
 
+$publishAssets = Join-Path $publishDir "Assets"
+if (-not (Test-Path $publishAssets)) {
+    New-Item -ItemType Directory -Path $publishAssets | Out-Null
+}
+Copy-Item (Join-Path $solutionDir "assets\icon.ico") -Destination (Join-Path $publishAssets "icon.ico") -Force
+Copy-Item (Join-Path $solutionDir "assets\icon.png") -Destination (Join-Path $publishAssets "icon.png") -Force
+
 Write-Host "`n==========================================================" -ForegroundColor Green
 Write-Host " Publish SUCCESSFUL!" -ForegroundColor Green
 Write-Host " Standalone binary output: $publishDir\HallConfig.App.exe" -ForegroundColor White
@@ -57,7 +64,7 @@ if ((Test-Path $isccPath) -and (Test-Path $issFile)) {
     Write-Host "`nCompiling Inno Setup Installer..." -ForegroundColor Cyan
     & $isccPath $issFile
     if ($LASTEXITCODE -eq 0) {
-        $setupExe = Join-Path $solutionDir "dist\HallConfig_Setup_v1.1.0.exe"
+        $setupExe = Join-Path $solutionDir "dist\HallConfig_Setup_v1.2.0.exe"
         Write-Host " Setup Installer generated at: $setupExe" -ForegroundColor Green
     }
 }

@@ -26,6 +26,9 @@ public class VJoyOutput : IOutputDevice
     private bool _isAcquired;
     private long _axisMin = 1;
     private long _axisMax = 32768;
+    private int _buttonCount;
+    private int _discPovCount;
+    private int _contPovCount;
     private bool _disposed;
 
     public string Name => $"vJoy Device #{_deviceId}";
@@ -34,6 +37,9 @@ public class VJoyOutput : IOutputDevice
     public bool IsAcquired => _isAcquired;
     public long AxisMin => _axisMin;
     public long AxisMax => _axisMax;
+    public int ButtonCount => _buttonCount;
+    public int DiscPovCount => _discPovCount;
+    public int ContPovCount => _contPovCount;
 
     public VJoyOutput(uint deviceId = 1, VJoyAxisType axis = VJoyAxisType.X)
     {
@@ -79,6 +85,20 @@ public class VJoyOutput : IOutputDevice
 
         if (_isAcquired)
         {
+            // Cache button and POV capabilities
+            try
+            {
+                _buttonCount = _joystick.GetVJDButtonNumber(_deviceId);
+                _discPovCount = _joystick.GetVJDDiscPovNumber(_deviceId);
+                _contPovCount = _joystick.GetVJDContPovNumber(_deviceId);
+            }
+            catch
+            {
+                _buttonCount = 0;
+                _discPovCount = 0;
+                _contPovCount = 0;
+            }
+
             // Cache min/max for all standard axes
             foreach (VJoyAxisType axis in (VJoyAxisType[])Enum.GetValues(typeof(VJoyAxisType)))
             {
@@ -119,6 +139,11 @@ public class VJoyOutput : IOutputDevice
 
     public bool UpdateAllAxes(float lx, float ly, float lt, float rt)
     {
+        return UpdateFullState(lx, ly, lt, rt, 0, 0, 0);
+    }
+
+    public bool UpdateFullState(float lx, float ly, float lt, float rt, short rawRx, short rawRy, ushort buttons)
+    {
         if (!_isAcquired) return false;
 
         bool ok = true;
@@ -130,6 +155,61 @@ public class VJoyOutput : IOutputDevice
         ok &= SetAxisValue(VJoyAxisType.Z, lt);
         // Axle 4 (RX) : Left Stick Y (Pitch)
         ok &= SetAxisValue(VJoyAxisType.RX, ly);
+
+        // Right Stick: Axle 5 (RY) & Axle 6 (RZ) passthrough
+        float normRx = Math.Clamp((rawRx + 32768f) / 65535f, 0f, 1f);
+        float normRy = Math.Clamp((rawRy + 32768f) / 65535f, 0f, 1f);
+        if (_axisRanges.ContainsKey(VJoyAxisType.RY))
+            ok &= SetAxisValue(VJoyAxisType.RY, normRx);
+        if (_axisRanges.ContainsKey(VJoyAxisType.RZ))
+            ok &= SetAxisValue(VJoyAxisType.RZ, normRy);
+
+        // Buttons passthrough (Button 1..10)
+        if (_buttonCount > 0)
+        {
+            if (_buttonCount >= 1) _joystick.SetBtn((buttons & 0x1000) != 0, _deviceId, 1);  // A
+            if (_buttonCount >= 2) _joystick.SetBtn((buttons & 0x2000) != 0, _deviceId, 2);  // B
+            if (_buttonCount >= 3) _joystick.SetBtn((buttons & 0x4000) != 0, _deviceId, 3);  // X
+            if (_buttonCount >= 4) _joystick.SetBtn((buttons & 0x8000) != 0, _deviceId, 4);  // Y
+            if (_buttonCount >= 5) _joystick.SetBtn((buttons & 0x0100) != 0, _deviceId, 5);  // LB
+            if (_buttonCount >= 6) _joystick.SetBtn((buttons & 0x0200) != 0, _deviceId, 6);  // RB
+            if (_buttonCount >= 7) _joystick.SetBtn((buttons & 0x0020) != 0, _deviceId, 7);  // Back
+            if (_buttonCount >= 8) _joystick.SetBtn((buttons & 0x0010) != 0, _deviceId, 8);  // Start
+            if (_buttonCount >= 9) _joystick.SetBtn((buttons & 0x0040) != 0, _deviceId, 9);  // LS Click
+            if (_buttonCount >= 10) _joystick.SetBtn((buttons & 0x0080) != 0, _deviceId, 10); // RS Click
+        }
+
+        // POV / D-Pad passthrough
+        if (_discPovCount > 0)
+        {
+            int pov = -1;
+            if ((buttons & 0x0001) != 0) pov = 0;      // Up
+            else if ((buttons & 0x0008) != 0) pov = 1; // Right
+            else if ((buttons & 0x0002) != 0) pov = 2; // Down
+            else if ((buttons & 0x0004) != 0) pov = 3; // Left
+
+            _joystick.SetDiscPov(pov, _deviceId, 1);
+        }
+        else if (_contPovCount > 0)
+        {
+            int contVal = -1; // Neutral
+            bool up = (buttons & 0x0001) != 0;
+            bool down = (buttons & 0x0002) != 0;
+            bool left = (buttons & 0x0004) != 0;
+            bool right = (buttons & 0x0008) != 0;
+
+            if (up && right) contVal = 4500;
+            else if (down && right) contVal = 13500;
+            else if (down && left) contVal = 22500;
+            else if (up && left) contVal = 31500;
+            else if (up) contVal = 0;
+            else if (right) contVal = 9000;
+            else if (down) contVal = 18000;
+            else if (left) contVal = 27000;
+
+            _joystick.SetContPov(contVal, _deviceId, 1);
+        }
+
         return ok;
     }
 
@@ -140,6 +220,18 @@ public class VJoyOutput : IOutputDevice
         SetAxisValue(VJoyAxisType.Y, 0.0f);
         SetAxisValue(VJoyAxisType.Z, 0.0f);
         SetAxisValue(VJoyAxisType.RX, 0.5f);
+        if (_axisRanges.ContainsKey(VJoyAxisType.RY)) SetAxisValue(VJoyAxisType.RY, 0.5f);
+        if (_axisRanges.ContainsKey(VJoyAxisType.RZ)) SetAxisValue(VJoyAxisType.RZ, 0.5f);
+
+        if (_buttonCount > 0)
+        {
+            for (uint i = 1; i <= Math.Min((uint)_buttonCount, 10); i++)
+            {
+                _joystick.SetBtn(false, _deviceId, i);
+            }
+        }
+        if (_discPovCount > 0) _joystick.SetDiscPov(-1, _deviceId, 1);
+        else if (_contPovCount > 0) _joystick.SetContPov(-1, _deviceId, 1);
     }
 
     public bool SetAxisValue(VJoyAxisType axis, float normalizedValue)

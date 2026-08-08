@@ -93,6 +93,49 @@ public class InputReader : IDisposable
         return true;
     }
 
+    /// <summary>
+    /// Baca SEMUA input gamepad dalam 1 syscall XInput:
+    /// - 4 axis utama (RT, LT, LX, LY) ternormalisasi 0.0..1.0 untuk SignalProcessor
+    /// - Right Stick (rawRx, rawRy) raw short (-32768..32767) untuk direct passthrough
+    /// - Buttons bitmask (A, B, X, Y, LB, RB, Start, Back, LS, RS, D-Pad) untuk direct passthrough
+    /// </summary>
+    public bool ReadAllInputs(
+        int deviceIndex,
+        out float rt, out float lt, out float lx, out float ly,
+        out short rawRx, out short rawRy,
+        out ushort buttons)
+    {
+        if (!XInputHelper.GetState(deviceIndex, out var state))
+        {
+            int nowCount = ConnectedGamepadsCount;
+            if (nowCount != _lastConnectedCount)
+            {
+                _lastConnectedCount = nowCount;
+                GamepadCountChanged?.Invoke(nowCount);
+            }
+            rt = lt = 0f;
+            lx = ly = 0.5f;
+            rawRx = rawRy = 0;
+            buttons = 0;
+            return false;
+        }
+
+        if (_lastConnectedCount != 1)
+        {
+            _lastConnectedCount = 1;
+            GamepadCountChanged?.Invoke(1);
+        }
+
+        rt = state.Gamepad.RightTrigger / 255f;
+        lt = state.Gamepad.LeftTrigger / 255f;
+        lx = Math.Clamp((state.Gamepad.ThumbLX + 32768f) / 65535f, 0f, 1f);
+        ly = Math.Clamp((state.Gamepad.ThumbLY + 32768f) / 65535f, 0f, 1f);
+        rawRx = state.Gamepad.ThumbRX;
+        rawRy = state.Gamepad.ThumbRY;
+        buttons = state.Gamepad.Buttons;
+        return true;
+    }
+
     /// <summary>Baca semua axis sekaligus.</summary>
     public XInputHelper.XInputState? GetFullReading(int deviceIndex = 0)
     {
