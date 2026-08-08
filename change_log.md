@@ -1,11 +1,16 @@
 # Changelog
 
 ### v1.2.0 (Latest)
-- **Full Input Passthrough (Buttons, D-Pad, Right Stick)**:
-  - Meneruskan seluruh input fisik controller (A, B, X, Y, LB, RB, Start, Back/Select, LS Click, RS Click, D-Pad, dan Right Stick X/Y) langsung ke controller virtual tanpa lag.
-  - Zero-overhead 1 syscall XInput batch polling di worker loop 250 Hz tanpa komputasi filter pada input passthrough.
-  - Dukungan passthrough lengkap baik pada mode **Virtual Xbox 360 (ViGEm)** maupun mode **vJoy**.
-- **Unified Batch Output Report**: Seluruh input (4 axis yang difilter + semua tombol & stick kanan) di-submit secara atomik dalam 1 report per tick.
+- **Full Gamepad Input Passthrough**:
+  - Passthrough instan (zero latency) untuk semua tombol fisik (`A`, `B`, `X`, `Y`, `LB`, `RB`, `Start`, `Back`, `LS click`, `RS click`), `D-Pad`, dan `Right Stick (RX/RY)` langsung ke controller virtual.
+  - Tetap mempertahankan filter Smoothing & Hysteresis pada 4 axis utama (`RT`, `LT`, `LX`, `LY`).
+  - Optimasi 1-syscall XInput polling & single-report atomic submit pada pipeline 250 Hz tanpa overhead CPU.
+  - Kompatibel penuh pada mode **Virtual Xbox 360 (ViGEm)** dan **vJoy**.
+- **Branding & Visual Refresh**:
+  - Penambahan icon aplikasi resmi (`icon.ico` & `icon.png`) pada window title bar, Windows taskbar, Alt-Tab switcher, dan installer Inno Setup.
+  - Desain About Window baru yang lebih minimalis & bersih dengan logo visual, tagline *"Smoother Inputs. Cleaner Trailbraking."*, dan link repository GitHub.
+- **Open Source Licensing**:
+  - Penambahan file lisensi resmi **MIT License** (2026).
 
 ---
 
