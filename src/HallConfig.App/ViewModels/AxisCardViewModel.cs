@@ -13,7 +13,13 @@ public class AxisCardViewModel : INotifyPropertyChanged
     public string Key { get; }
     public string DisplayName { get; }
     public string ShortName { get; }
-    public string Subtitle { get; }
+
+    private string _subtitle;
+    public string Subtitle
+    {
+        get => _subtitle;
+        set => SetField(ref _subtitle, value);
+    }
 
     public ICommand SelectCommand { get; }
 
@@ -22,7 +28,7 @@ public class AxisCardViewModel : INotifyPropertyChanged
         Key = key;
         DisplayName = displayName;
         ShortName = shortName;
-        Subtitle = subtitle;
+        _subtitle = subtitle;
         _onSelected = onSelected;
         SelectCommand = new RelayCommand(() => _onSelected(Key));
     }

@@ -2,7 +2,7 @@
 ; Inno Setup 6 Script (.iss)
 
 #define MyAppName "HallConfig"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Yefta Asyel"
 #define MyAppURL "https://instagram.com/yefta_asyel"
 #define MyAppExeName "HallConfig.App.exe"

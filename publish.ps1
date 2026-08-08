@@ -57,7 +57,7 @@ if ((Test-Path $isccPath) -and (Test-Path $issFile)) {
     Write-Host "`nCompiling Inno Setup Installer..." -ForegroundColor Cyan
     & $isccPath $issFile
     if ($LASTEXITCODE -eq 0) {
-        $setupExe = Join-Path $solutionDir "dist\HallConfig_Setup_v1.0.0.exe"
+        $setupExe = Join-Path $solutionDir "dist\HallConfig_Setup_v1.1.0.exe"
         Write-Host " Setup Installer generated at: $setupExe" -ForegroundColor Green
     }
 }

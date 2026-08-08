@@ -185,6 +185,67 @@
                                FontSize="11" Foreground="#8B949E" Margin="0,2,0,0"/>
                     <Separator Margin="0,14,0,10"/>
 
+                    <!-- Output Mode Selector -->
+                    <Border Background="#161B22" BorderBrush="#30363D" BorderThickness="1"
+                            CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="OUTPUT EMULATION MODE" FontSize="9" FontWeight="Bold" Foreground="#58A6FF"/>
+                            <Grid Margin="0,6,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Xbox 360 Mode Button -->
+                                <Button Grid.Column="0" Command="{Binding SetXbox360ModeCommand}"
+                                        Height="30" Padding="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="ModeBorder" CornerRadius="4" Background="#21262D"
+                                                    BorderBrush="#30363D" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="🎮" FontSize="11" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="Xbox 360" FontSize="11" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsXbox360Mode}" Value="True">
+                                                    <Setter TargetName="ModeBorder" Property="Background" Value="#1F6FEB"/>
+                                                    <Setter TargetName="ModeBorder" Property="BorderBrush" Value="#388BFD"/>
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- vJoy Mode Button -->
+                                <Button Grid.Column="2" Command="{Binding SetVJoyModeCommand}"
+                                        Height="30" Padding="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="ModeBorder" CornerRadius="4" Background="#21262D"
+                                                    BorderBrush="#30363D" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="🕹️" FontSize="11" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="vJoy" FontSize="11" FontWeight="SemiBold" Foreground="#C9D1D9"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IsVJoyMode}" Value="True">
+                                                    <Setter TargetName="ModeBorder" Property="Background" Value="#1F6FEB"/>
+                                                    <Setter TargetName="ModeBorder" Property="BorderBrush" Value="#388BFD"/>
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            <TextBlock Text="{Binding OutputModeDescription}" FontSize="9.5" Foreground="#8B949E"
+                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Active Axis Header Card -->
                     <Border Background="#161B22" BorderBrush="#30363D" BorderThickness="1"
                             CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
@@ -343,7 +404,7 @@
                     </StackPanel>
 
                     <!-- Central Hint -->
-                    <TextBlock Grid.Column="1" Text="Click any Axis Card to select for tuning &amp; vJoy routing"
+                    <TextBlock Grid.Column="1" Text="Click any Axis Card to select for tuning &amp; output routing"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                FontSize="11" Foreground="#6E7681"/>
 
@@ -443,7 +504,8 @@
                                                     <!-- Selected / Target Badge -->
                                                     <Border x:Name="SelectedTag" CornerRadius="4" Padding="8,3"
                                                             Background="#1F6FEB" Visibility="Collapsed">
-                                                        <TextBlock Text="🎯 TARGET vJOY" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                        <TextBlock Text="{Binding DataContext.TargetOutputBadgeText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                   FontSize="10" FontWeight="Bold" Foreground="White"/>
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>

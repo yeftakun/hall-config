@@ -25,10 +25,10 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="HallConfig" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF"/>
-                    <TextBlock Text="Version 1.0.0 (x64)" FontSize="11" Foreground="#8B949E"/>
+                    <TextBlock Text="Version 1.1.0 (x64)" FontSize="11" Foreground="#8B949E"/>
                 </StackPanel>
             </StackPanel>
-            <TextBlock Text="Gamepad Hall-Effect Trigger &amp; Stick Signal Conditioner for vJoy."
+            <TextBlock Text="Gamepad Hall-Effect Trigger &amp; Stick Signal Conditioner for ViGEm &amp; vJoy."
                        FontSize="12" Foreground="#C9D1D9" Margin="0,10,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
@@ -62,7 +62,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Target" FontSize="12" Foreground="#8B949E" Width="90"/>
-                    <TextBlock Grid.Column="1" Text="vJoy • Assetto Corsa • PC Sim Racing" FontSize="12" Foreground="#8B949E"/>
+                    <TextBlock Grid.Column="1" Text="ViGEm XInput • vJoy • Assetto Corsa" FontSize="12" Foreground="#8B949E"/>
                 </Grid>
             </StackPanel>
         </Border>

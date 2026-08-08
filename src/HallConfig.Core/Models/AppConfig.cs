@@ -9,6 +9,7 @@ public class AppConfig
     // ─── Base fields (unchanged, backward compat) ──────────────────────────────
     public int DeviceIndex { get; set; } = 0;
     public string AxisSource { get; set; } = "RightTrigger";
+    public string OutputMode { get; set; } = "Xbox360"; // "Xbox360" or "vJoy"
     public uint VJoyDeviceId { get; set; } = 1;
     public string VJoyAxis { get; set; } = "X";
     public int PollingHz { get; set; } = 250;

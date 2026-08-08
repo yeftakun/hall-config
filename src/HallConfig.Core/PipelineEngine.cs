@@ -12,7 +12,7 @@ public class PipelineEngine : IDisposable
     private readonly InputReader _inputReader;
     // Per-axis signal processors so each axis has independent _smoothed / _active state.
     private readonly ConcurrentDictionary<string, SignalProcessor> _processors = new();
-    private VJoyOutput _vjoyOutput;
+    private IOutputDevice _outputDevice;
     private AppConfig _config;
     private ProcessorConfig _processorConfig;
 
@@ -36,7 +36,7 @@ public class PipelineEngine : IDisposable
     /// <summary>Returns the SignalProcessor for the current AxisSource (for diagnostics).</summary>
     public SignalProcessor Processor => GetOrCreateProcessor(_config.AxisSource);
     public InputReader Reader => _inputReader;
-    public VJoyOutput Output => _vjoyOutput;
+    public IOutputDevice Output => _outputDevice;
     public string? DebugLogPath => _debugLogPath;
 
     /// <summary>
@@ -49,7 +49,7 @@ public class PipelineEngine : IDisposable
         AppConfig? config = null,
         InputReader? inputReader = null,
         SignalProcessor? signalProcessor = null,
-        VJoyOutput? vjoyOutput = null)
+        IOutputDevice? outputDevice = null)
     {
         _config = config ?? new AppConfig();
         _processorConfig = _config.ToProcessorConfig();
@@ -58,8 +58,20 @@ public class PipelineEngine : IDisposable
         if (signalProcessor != null)
             _processors[_config.AxisSource] = signalProcessor;
 
-        var axisType = VJoyOutput.ParseAxis(_config.VJoyAxis);
-        _vjoyOutput = vjoyOutput ?? new VJoyOutput(_config.VJoyDeviceId, axisType);
+        _outputDevice = outputDevice ?? CreateOutputDevice(_config);
+    }
+
+    public static IOutputDevice CreateOutputDevice(AppConfig config)
+    {
+        if (string.Equals(config.OutputMode, "vJoy", StringComparison.OrdinalIgnoreCase))
+        {
+            var axisType = VJoyOutput.ParseAxis(config.VJoyAxis);
+            return new VJoyOutput(config.VJoyDeviceId, axisType);
+        }
+        else
+        {
+            return new Xbox360Output();
+        }
     }
 
     private SignalProcessor GetOrCreateProcessor(string axisSource) =>
@@ -102,15 +114,32 @@ public class PipelineEngine : IDisposable
         _config = newConfig;
         _processorConfig = newConfig.ToProcessorConfig();
 
-        var newAxisType = VJoyOutput.ParseAxis(newConfig.VJoyAxis);
-        if (_vjoyOutput.DeviceId != newConfig.VJoyDeviceId || _vjoyOutput.Axis != newAxisType)
+        bool wasAcquired = _outputDevice.IsAcquired;
+        bool needRecreate = false;
+
+        if (_outputDevice is Xbox360Output && string.Equals(newConfig.OutputMode, "vJoy", StringComparison.OrdinalIgnoreCase))
         {
-            bool wasAcquired = _vjoyOutput.IsAcquired;
-            _vjoyOutput.Dispose();
-            _vjoyOutput = new VJoyOutput(newConfig.VJoyDeviceId, newAxisType);
+            needRecreate = true;
+        }
+        else if (_outputDevice is VJoyOutput vjoy)
+        {
+            if (!string.Equals(newConfig.OutputMode, "vJoy", StringComparison.OrdinalIgnoreCase))
+            {
+                needRecreate = true;
+            }
+            else if (vjoy.DeviceId != newConfig.VJoyDeviceId)
+            {
+                needRecreate = true;
+            }
+        }
+
+        if (needRecreate)
+        {
+            _outputDevice.Dispose();
+            _outputDevice = CreateOutputDevice(newConfig);
             if (wasAcquired || _isRunning)
             {
-                _vjoyOutput.Acquire();
+                _outputDevice.Acquire();
             }
         }
     }
@@ -119,10 +148,15 @@ public class PipelineEngine : IDisposable
     {
         if (_isRunning) return true;
 
-        if (!_vjoyOutput.IsAcquired)
+        if (!_outputDevice.IsAcquired)
         {
-            if (!_vjoyOutput.Acquire())
-                StatusMessage?.Invoke($"[WARNING] Failed to acquire vJoy Device #{_vjoyOutput.DeviceId}. Ensure vJoy is installed.");
+            if (!_outputDevice.Acquire())
+            {
+                if (_outputDevice is Xbox360Output)
+                    StatusMessage?.Invoke("[WARNING] Failed to initialize Virtual Xbox 360 controller. Ensure ViGEmBus driver is running.");
+                else
+                    StatusMessage?.Invoke("[WARNING] Failed to acquire vJoy device. Ensure vJoy is installed.");
+            }
         }
 
         Interlocked.Exchange(ref _workerIterationCount, 0);
@@ -149,12 +183,11 @@ public class PipelineEngine : IDisposable
         {
             _workerThread.Join(500);
             _workerThread = null;
-        }        if (_vjoyOutput.IsAcquired)
+        }
+
+        if (_outputDevice.IsAcquired)
         {
-            _vjoyOutput.SetAxisValue(VJoyAxisType.X, 0.5f);
-            _vjoyOutput.SetAxisValue(VJoyAxisType.Y, 0.0f);
-            _vjoyOutput.SetAxisValue(VJoyAxisType.Z, 0.0f);
-            _vjoyOutput.SetAxisValue(VJoyAxisType.RX, 0.5f);
+            _outputDevice.ResetToCenter();
         }
     }
 
@@ -169,12 +202,12 @@ public class PipelineEngine : IDisposable
 
         // Separate per-category error timestamps to prevent one error suppressing another
         long lastReadErrorMs = -5000;
-        long lastVJoyErrorMs = -5000;
+        long lastOutputErrorMs = -5000;
         long lastSampleErrorMs = -5000;
         long lastUnhandledMs = -5000;
 
         WriteLog($"WorkerLoop starting. ThreadId={Environment.CurrentManagedThreadId}, " +
-                 $"TargetHz={_config.PollingHz}, InitialAxisSource={_config.AxisSource}");
+                 $"TargetHz={_config.PollingHz}, InitialAxisSource={_config.AxisSource}, OutputMode={_config.OutputMode}");
 
         while (_isRunning)
         {
@@ -236,27 +269,20 @@ public class PipelineEngine : IDisposable
                     _                     => procRT.IsActive
                 };
 
-                // --- Write all axes to vJoy with requested mapping ---
-                // Axle 1 (X)  : Joystick L horizontal (LeftStickX)
-                // Axle 2 (Y)  : Right Trigger (RT)
-                // Axle 3 (Z)  : Left Trigger (LT)
-                // Axle 4 (RX) : Joystick L vertical (LeftStickY)
-                if (_vjoyOutput.IsAcquired)
+                // --- Write all axes to active Output Device ---
+                if (_outputDevice.IsAcquired)
                 {
                     try
                     {
-                        _vjoyOutput.SetAxisValue(VJoyAxisType.X, processedLX);
-                        _vjoyOutput.SetAxisValue(VJoyAxisType.Y, processedRT);
-                        _vjoyOutput.SetAxisValue(VJoyAxisType.Z, processedLT);
-                        _vjoyOutput.SetAxisValue(VJoyAxisType.RX, processedLY);
+                        _outputDevice.UpdateAllAxes(processedLX, processedLY, processedLT, processedRT);
                     }
                     catch (Exception ex)
                     {
                         long now = sw.ElapsedMilliseconds;
-                        if (now - lastVJoyErrorMs > 1000)
+                        if (now - lastOutputErrorMs > 1000)
                         {
-                            lastVJoyErrorMs = now;
-                            WriteLog($"[EXCEPTION SetAxisValue] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                            lastOutputErrorMs = now;
+                            WriteLog($"[EXCEPTION UpdateAllAxes] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
                         }
                     }
                 } 
@@ -293,7 +319,7 @@ public class PipelineEngine : IDisposable
                     lastHeartbeatMs = nowMs;
                     WriteLog($"[HEARTBEAT] Iter={loopIteration}, Hz={_config.PollingHz}, Raw={selectedRaw:F4}, Out={selectedProcessed:F4}, " +
                              $"Axis={axisSource}, ProcessorCount={_processors.Count}, " +
-                             $"vJoyAcq={_vjoyOutput.IsAcquired}, GamepadConn={_inputReader.IsGamepadConnected}");
+                             $"Device={_outputDevice.Name}, OutputAcq={_outputDevice.IsAcquired}, GamepadConn={_inputReader.IsGamepadConnected}");
                 }
 
                 // --- Precise timing ---
@@ -337,7 +363,7 @@ public class PipelineEngine : IDisposable
         if (!_disposed)
         {
             Stop();
-            _vjoyOutput.Dispose();
+            _outputDevice.Dispose();
             _inputReader.Dispose();
 
             lock (_logLock)

@@ -12,7 +12,7 @@ namespace HallConfig.App.ViewModels;
 /// <summary>
 /// Main ViewModel. Pure of WPF visual types.
 /// Supports 4 independent Axis Cards (RT, LT, LX, LY) with real-time RAW and OUTPUT meters.
-/// Clicking any axis card selects that axis for tuning & vJoy output.
+/// Supports dual output mode: Native XInput Virtual Xbox 360 (ViGEm) and DirectInput (vJoy).
 /// </summary>
 public class MainViewModel : INotifyPropertyChanged, IDisposable
 {
@@ -56,13 +56,13 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         _engine      = new PipelineEngine(_appConfig);
 
         // Axis cards setup
-        LxCard = new AxisCardViewModel("LeftStickX",   "Left Stick X",  "LX", "Target: vJoy Axle 1 (X) • Steering", SelectAxis);
-        RtCard = new AxisCardViewModel("RightTrigger", "Right Trigger", "RT", "Target: vJoy Axle 2 (Y) • Throttle", SelectAxis);
-        LtCard = new AxisCardViewModel("LeftTrigger",  "Left Trigger",  "LT", "Target: vJoy Axle 3 (Z) • Brake", SelectAxis);
-        LyCard = new AxisCardViewModel("LeftStickY",   "Left Stick Y",  "LY", "Target: vJoy Axle 4 (Rx) • Pitch", SelectAxis);
+        LxCard = new AxisCardViewModel("LeftStickX",   "Left Stick X",  "LX", "", SelectAxis);
+        RtCard = new AxisCardViewModel("RightTrigger", "Right Trigger", "RT", "", SelectAxis);
+        LtCard = new AxisCardViewModel("LeftTrigger",  "Left Trigger",  "LT", "", SelectAxis);
+        LyCard = new AxisCardViewModel("LeftStickY",   "Left Stick Y",  "LY", "", SelectAxis);
         AllCards = new[] { LxCard, RtCard, LtCard, LyCard };
 
-        // Initialize cards config summaries
+        RefreshCardSubtitles();
         RefreshAllCardsConfigSummary();
 
         // StatusMessage: very rare, non-blocking BeginInvoke is fine
@@ -75,9 +75,11 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         SyncUiFromCurrentAxisConfig();
 
         // Commands
-        TogglePipelineCommand = new RelayCommand(TogglePipeline);
-        SaveConfigCommand     = new RelayCommand(SaveConfig);
-        LoadConfigCommand     = new RelayCommand(LoadConfig);
+        TogglePipelineCommand   = new RelayCommand(TogglePipeline);
+        SaveConfigCommand       = new RelayCommand(SaveConfig);
+        LoadConfigCommand       = new RelayCommand(LoadConfig);
+        SetXbox360ModeCommand   = new RelayCommand(() => OutputMode = "Xbox360");
+        SetVJoyModeCommand      = new RelayCommand(() => OutputMode = "vJoy");
 
         // UI refresh timer — runs on UI thread at 60 Hz
         _uiTimer = new DispatcherTimer(DispatcherPriority.Render)
@@ -155,7 +157,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    // ─── Axis Selection ───────────────────────────────────────────────────────
+    // ─── Axis Selection & Subtitles ───────────────────────────────────────────
     public void SelectAxis(string axisKey)
     {
         if (string.IsNullOrWhiteSpace(axisKey)) return;
@@ -170,6 +172,18 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         }
         OnPropertyChanged(nameof(SelectedAxisTitle));
         OnPropertyChanged(nameof(SelectedAxisSubtitle));
+    }
+
+    private void RefreshCardSubtitles()
+    {
+        bool isXbox = IsXbox360Mode;
+        LxCard.Subtitle = isXbox ? "Target: Virtual Xbox LX • Steering" : "Target: vJoy Axle 1 (X) • Steering";
+        RtCard.Subtitle = isXbox ? "Target: Virtual Xbox RT • Throttle" : "Target: vJoy Axle 2 (Y) • Throttle";
+        LtCard.Subtitle = isXbox ? "Target: Virtual Xbox LT • Brake"    : "Target: vJoy Axle 3 (Z) • Brake";
+        LyCard.Subtitle = isXbox ? "Target: Virtual Xbox LY • Pitch"    : "Target: vJoy Axle 4 (Rx) • Pitch";
+
+        OnPropertyChanged(nameof(SelectedAxisSubtitle));
+        OnPropertyChanged(nameof(TargetOutputBadgeText));
     }
 
     private void RefreshAllCardsConfigSummary()
@@ -222,6 +236,51 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
     public string PipelineRateText => IsPipelineRunning ? $"{_displayedRate} Hz" : "— Hz";
 
+    // ─── Output Mode Selection ───────────────────────────────────────────────
+
+    public string OutputMode
+    {
+        get => _appConfig.OutputMode ?? "Xbox360";
+        set
+        {
+            if (!string.Equals(_appConfig.OutputMode, value, StringComparison.OrdinalIgnoreCase))
+            {
+                _appConfig.OutputMode = value;
+                _engine.UpdateConfig(_appConfig);
+                RefreshCardSubtitles();
+                OnPropertyChanged(nameof(OutputMode));
+                OnPropertyChanged(nameof(IsXbox360Mode));
+                OnPropertyChanged(nameof(IsVJoyMode));
+                OnPropertyChanged(nameof(OutputModeDescription));
+                OnPropertyChanged(nameof(TargetOutputBadgeText));
+            }
+        }
+    }
+
+    public bool IsXbox360Mode
+    {
+        get => !string.Equals(_appConfig.OutputMode, "vJoy", StringComparison.OrdinalIgnoreCase);
+        set
+        {
+            if (value) OutputMode = "Xbox360";
+        }
+    }
+
+    public bool IsVJoyMode
+    {
+        get => string.Equals(_appConfig.OutputMode, "vJoy", StringComparison.OrdinalIgnoreCase);
+        set
+        {
+            if (value) OutputMode = "vJoy";
+        }
+    }
+
+    public string OutputModeDescription => IsXbox360Mode
+        ? "Native XInput Virtual Controller (ViGEm) — Ideal for Assetto Corsa & modern games"
+        : "Generic DirectInput Device (vJoy) — Classic compatibility mode";
+
+    public string TargetOutputBadgeText => IsXbox360Mode ? "🎯 TARGET XBOX 360" : "🎯 TARGET vJOY";
+
     // ── Config-bound properties ──────────────────────────────────────────────
 
     private string _selectedAxisSource = "RightTrigger";
@@ -251,11 +310,11 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
     public string SelectedAxisSubtitle => _selectedAxisSource switch
     {
-        "RightTrigger" => "Routing -> vJoy Axle 2 (Y) [Throttle]",
-        "LeftTrigger"  => "Routing -> vJoy Axle 3 (Z) [Brake]",
-        "LeftStickX"   => "Routing -> vJoy Axle 1 (X) [Steering]",
-        "LeftStickY"   => "Routing -> vJoy Axle 4 (Rx) [Pitch]",
-        _              => "Routing -> vJoy Output"
+        "RightTrigger" => IsXbox360Mode ? "Routing -> Virtual Xbox RT [Throttle]" : "Routing -> vJoy Axle 2 (Y) [Throttle]",
+        "LeftTrigger"  => IsXbox360Mode ? "Routing -> Virtual Xbox LT [Brake]"    : "Routing -> vJoy Axle 3 (Z) [Brake]",
+        "LeftStickX"   => IsXbox360Mode ? "Routing -> Virtual Xbox LX [Steering]" : "Routing -> vJoy Axle 1 (X) [Steering]",
+        "LeftStickY"   => IsXbox360Mode ? "Routing -> Virtual Xbox LY [Pitch]"    : "Routing -> vJoy Axle 4 (Rx) [Pitch]",
+        _              => IsXbox360Mode ? "Routing -> Virtual Xbox 360"           : "Routing -> vJoy Output"
     };
 
     private bool _smoothingEnabled;
@@ -335,7 +394,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    private string _statusMessage = "Ready — select an axis card to tune, then Start.";
+    private string _statusMessage = "Ready — select an axis card to tune, choose output mode, then Start.";
     public string StatusMessage
     {
         get => _statusMessage;
@@ -346,6 +405,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     public RelayCommand TogglePipelineCommand { get; }
     public RelayCommand SaveConfigCommand     { get; }
     public RelayCommand LoadConfigCommand     { get; }
+    public RelayCommand SetXbox360ModeCommand { get; }
+    public RelayCommand SetVJoyModeCommand    { get; }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -401,7 +462,10 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
                 bool started = _engine.Start();
                 IsPipelineRunning = started;
-                StatusMessage = started ? "Pipeline active — sending to vJoy." : "Failed to start — check vJoy.";
+                bool isXbox = IsXbox360Mode;
+                StatusMessage = started
+                    ? (isXbox ? "Pipeline active — sending to Virtual Xbox 360 (ViGEm)." : "Pipeline active — sending to vJoy.")
+                    : (isXbox ? "Failed to start — check ViGEmBus driver." : "Failed to start — check vJoy device.");
             }
             catch (Exception ex) { StatusMessage = $"Start error: {ex.Message}"; }
         }
@@ -429,8 +493,13 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             _engine.UpdateConfig(_appConfig);
             _selectedAxisSource = _appConfig.AxisSource;
             UpdateCardSelection();
+            RefreshCardSubtitles();
             SyncUiFromCurrentAxisConfig();
             RefreshAllCardsConfigSummary();
+            OnPropertyChanged(nameof(OutputMode));
+            OnPropertyChanged(nameof(IsXbox360Mode));
+            OnPropertyChanged(nameof(IsVJoyMode));
+            OnPropertyChanged(nameof(OutputModeDescription));
 
             if (wasRunning) TogglePipeline();
             StatusMessage = "Config loaded.";

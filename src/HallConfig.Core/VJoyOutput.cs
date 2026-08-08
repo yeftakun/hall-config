@@ -16,7 +16,7 @@ public enum VJoyAxisType : uint
     SL1 = HID_USAGES.HID_USAGE_SL1    // Axle 8 (Slider 1)
 }
 
-public class VJoyOutput : IDisposable
+public class VJoyOutput : IOutputDevice
 {
     private readonly vJoy _joystick;
     private readonly uint _deviceId;
@@ -28,6 +28,7 @@ public class VJoyOutput : IDisposable
     private long _axisMax = 32768;
     private bool _disposed;
 
+    public string Name => $"vJoy Device #{_deviceId}";
     public uint DeviceId => _deviceId;
     public VJoyAxisType Axis => _axisType;
     public bool IsAcquired => _isAcquired;
@@ -109,6 +110,36 @@ public class VJoyOutput : IDisposable
     public bool SetValue(float normalizedValue)
     {
         return SetAxisValue(_axisType, normalizedValue);
+    }
+
+    public bool SetAxisValue(string axisName, float normalizedValue)
+    {
+        return SetAxisValue(ParseAxis(axisName), normalizedValue);
+    }
+
+    public bool UpdateAllAxes(float lx, float ly, float lt, float rt)
+    {
+        if (!_isAcquired) return false;
+
+        bool ok = true;
+        // Axle 1 (X)  : Left Stick X (Steering)
+        ok &= SetAxisValue(VJoyAxisType.X, lx);
+        // Axle 2 (Y)  : Right Trigger (Throttle)
+        ok &= SetAxisValue(VJoyAxisType.Y, rt);
+        // Axle 3 (Z)  : Left Trigger (Brake)
+        ok &= SetAxisValue(VJoyAxisType.Z, lt);
+        // Axle 4 (RX) : Left Stick Y (Pitch)
+        ok &= SetAxisValue(VJoyAxisType.RX, ly);
+        return ok;
+    }
+
+    public void ResetToCenter()
+    {
+        if (!_isAcquired) return;
+        SetAxisValue(VJoyAxisType.X, 0.5f);
+        SetAxisValue(VJoyAxisType.Y, 0.0f);
+        SetAxisValue(VJoyAxisType.Z, 0.0f);
+        SetAxisValue(VJoyAxisType.RX, 0.5f);
     }
 
     public bool SetAxisValue(VJoyAxisType axis, float normalizedValue)
