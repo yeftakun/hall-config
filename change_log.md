@@ -1,6 +1,18 @@
 # Changelog
 
-### v1.2.0 (Latest)
+### v1.3.0 (Latest)
+- **Vibration Feedback System**:
+  - Dukungan getaran *Rumble Motor* (Left/Right) langsung ke physical controller (tidak ada delay).
+  - Isolasi *rumble* game secara mutlak: Getaran 100% dipasok murni oleh input *throttle/brake* Anda; mengabaikan getaran ABS atau tabrakan tidak wajar dari game aslinya.
+  - Opsi *Motor Selection* (High/Low freq) independen per axis (RT/LT) dengan penanganan limit intensitas prioritas tinggi (`MAX()`) saat terjadi irisan mapping.
+  - Dua mode profil getar: `Proportional` (getaran dinamis melandai menyesuaikan seberapa dalam *trigger* ditekan) dan `Static` (getaran konstan dengan intensitas statis seketika sesudah titik *threshold* terlewati).
+- **System Diagnostics & Quality of Life**:
+  - Auto-check ketersediaan *update* terbaru secara *non-blocking* di latar belakang dan panel manual di jendela About.
+  - Arsitektur Singleton untuk *About Window* guna menghindari replikasi/pembukaan banyak jendela (anti tumpuk) dari System Tray.
+  - *Comprehensive Session Logging* tersentralisasi harian di `%AppData%\HallConfig\logs\` beserta penangkapan aplikasi error tak terduga, konektivitas perangkat, dan laju pipeline.
+
+---
+### v1.2.0
 - **Full Gamepad Input Passthrough**:
   - Passthrough instan (zero latency) untuk semua tombol fisik (`A`, `B`, `X`, `Y`, `LB`, `RB`, `Start`, `Back`, `LS click`, `RS click`), `D-Pad`, dan `Right Stick (RX/RY)` langsung ke controller virtual.
   - Tetap mempertahankan filter Smoothing & Hysteresis pada 4 axis utama (`RT`, `LT`, `LX`, `LY`).

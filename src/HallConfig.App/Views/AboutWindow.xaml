@@ -26,7 +26,7 @@
             <!-- App Title & Version -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
                 <TextBlock Text="HallConfig" FontSize="22" FontWeight="Bold" Foreground="#00D2FF"/>
-                <TextBlock Text="v1.2.0" FontSize="11" FontWeight="SemiBold" Foreground="#8B949E" VerticalAlignment="Bottom" Margin="8,0,0,4"/>
+                <TextBlock Text="v1.3.0" FontSize="11" FontWeight="SemiBold" Foreground="#8B949E" VerticalAlignment="Bottom" Margin="8,0,0,4"/>
             </StackPanel>
 
             <!-- Catchy Tagline -->
