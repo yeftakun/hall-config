@@ -392,6 +392,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -405,6 +406,10 @@
                                 <ComboBoxItem Content="Low Freq (Left Motor)"/>
                                 <ComboBoxItem Content="High Freq (Right Motor)"/>
                             </ComboBox>
+                            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" SelectedIndex="{Binding RTVibrationModeIndex}" Margin="0,8,0,0" Visibility="{Binding ShowRTVibrationToggle, Converter={StaticResource BoolToVis}}">
+                                <ComboBoxItem Content="Mode: Proportional"/>
+                                <ComboBoxItem Content="Mode: Static"/>
+                            </ComboBox>
                             
                             <!-- LT -->
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Enable LT Vibration" FontSize="12" Foreground="#C9D1D9" VerticalAlignment="Center" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}"/>
@@ -412,6 +417,10 @@
                             <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" SelectedIndex="{Binding LTVibrationMotorIndex}" Margin="0,8,0,0" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}">
                                 <ComboBoxItem Content="Low Freq (Left Motor)"/>
                                 <ComboBoxItem Content="High Freq (Right Motor)"/>
+                            </ComboBox>
+                            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" SelectedIndex="{Binding LTVibrationModeIndex}" Margin="0,8,0,0" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}">
+                                <ComboBoxItem Content="Mode: Proportional"/>
+                                <ComboBoxItem Content="Mode: Static"/>
                             </ComboBox>
                         </Grid>
                         

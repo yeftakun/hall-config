@@ -519,6 +519,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             OnPropertyChanged(nameof(MaxVibrationPercent));
             OnPropertyChanged(nameof(RTVibrationMotorIndex));
             OnPropertyChanged(nameof(LTVibrationMotorIndex));
+            OnPropertyChanged(nameof(RTVibrationModeIndex));
+            OnPropertyChanged(nameof(LTVibrationModeIndex));
         }
         catch (Exception ex) { StatusMessage = $"Load error: {ex.Message}"; }
     }
@@ -591,6 +593,34 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             if (_appConfig.LTVibrationMotor != newMotor)
             {
                 _appConfig.LTVibrationMotor = newMotor;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int RTVibrationModeIndex
+    {
+        get => _appConfig.RTVibrationMode == "Static" ? 1 : 0;
+        set
+        {
+            string newMode = value == 1 ? "Static" : "Proportional";
+            if (_appConfig.RTVibrationMode != newMode)
+            {
+                _appConfig.RTVibrationMode = newMode;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int LTVibrationModeIndex
+    {
+        get => _appConfig.LTVibrationMode == "Static" ? 1 : 0;
+        set
+        {
+            string newMode = value == 1 ? "Static" : "Proportional";
+            if (_appConfig.LTVibrationMode != newMode)
+            {
+                _appConfig.LTVibrationMode = newMode;
                 OnPropertyChanged();
             }
         }

@@ -371,8 +371,23 @@ public class PipelineEngine : IDisposable
                     float leftMotor = 0f;
                     float rightMotor = 0f;
                     
-                    float rtVal = _config.RTVibrationEnabled ? _lastProcessedRT * (_config.MaxVibrationPercent / 100f) : 0f;
-                    float ltVal = _config.LTVibrationEnabled ? _lastProcessedLT * (_config.MaxVibrationPercent / 100f) : 0f;
+                    float rtVal = 0f;
+                    if (_config.RTVibrationEnabled)
+                    {
+                        if (_config.RTVibrationMode == "Static")
+                            rtVal = _lastProcessedRT > 0f ? (_config.MaxVibrationPercent / 100f) : 0f;
+                        else
+                            rtVal = _lastProcessedRT * (_config.MaxVibrationPercent / 100f);
+                    }
+
+                    float ltVal = 0f;
+                    if (_config.LTVibrationEnabled)
+                    {
+                        if (_config.LTVibrationMode == "Static")
+                            ltVal = _lastProcessedLT > 0f ? (_config.MaxVibrationPercent / 100f) : 0f;
+                        else
+                            ltVal = _lastProcessedLT * (_config.MaxVibrationPercent / 100f);
+                    }
 
                     if (_config.RTVibrationEnabled)
                     {

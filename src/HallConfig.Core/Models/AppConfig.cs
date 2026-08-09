@@ -23,8 +23,10 @@ public class AppConfig
     // ─── Vibration Feedback (PLAN2.md §6) ─────────────────────────────────────
     public bool RTVibrationEnabled { get; set; } = false;
     public string RTVibrationMotor { get; set; } = "HighFreq"; // "HighFreq" (Right) or "LowFreq" (Left)
+    public string RTVibrationMode { get; set; } = "Proportional"; // "Proportional" or "Static"
     public bool LTVibrationEnabled { get; set; } = false;
     public string LTVibrationMotor { get; set; } = "LowFreq";
+    public string LTVibrationMode { get; set; } = "Proportional"; // "Proportional" or "Static"
     public int MaxVibrationPercent { get; set; } = 80;
 
     /// <summary>

@@ -100,8 +100,16 @@ XInput cuma punya 2 motor: `LeftMotorSpeed` (motor besar/frekuensi rendah) dan `
 
 **Resolusi konflik:** kalau RT dan LT kebetulan dipilih ke motor YANG SAMA, nilai motor itu = `MAX(nilai_axis_1, nilai_axis_2)` — bukan dijumlah/dirata-rata, supaya getaran tetap jelas terasa dan tidak "encer".
 
+### Mode Intensitas (per axis)
+Selain mode proporsional (default), sediakan mode **Static Intensity**: begitu ProcessedOutput axis itu aktif (di atas 0 / sudah lewat threshold hysteresis), motor langsung ke Max Vibration penuh — TIDAK ikut naik-turun sesuai kedalaman tekan. Berguna buat sinyal "sudah aktif" yang tegas, bukan gradasi halus.
+
+- Pilihan per axis: `Proportional` (default) atau `Static`.
+- Rumus mode Static: `motorValue = (ProcessedOutput > 0) ? (MaxVibrationPercent/100 × 65535) : 0`.
+- Simpan pilihan mode ini di config.json per axis, sejajar dengan VibrationEnabled dan MotorSelection.
+
 ### Implementasi
-- Nilai motor = `ProcessedOutput × (MaxVibrationPercent / 100) × 65535` (batas atas ushort XInput).
+- Mode Proportional: `ProcessedOutput × (MaxVibrationPercent / 100) × 65535` (batas atas ushort XInput).
+- Mode Static: lihat rumus di atas.
 - Tulis via `XInputSetState(physicalUserIndex, vibration)` — target device FISIK (bukan device virtual), lewat XInputHelper yang sudah ada.
 - **Compatible dengan HidHide** — karena HallConfig.App.exe sudah di-whitelist, tetap bisa baca+tulis device fisik walau disembunyikan dari game lain.
 - **Cek capability dulu** — pakai `XInputGetCapabilities` untuk deteksi apakah controller mendukung vibration motor sama sekali (device seperti Gamesir Nova Lite kemungkinan besar support, tapi tetap perlu graceful fallback: kalau tidak didukung, disable toggle-nya di GUI, jangan silent fail).
