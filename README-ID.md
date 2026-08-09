@@ -63,11 +63,12 @@ Buka HallConfig, pilih **Axis Source** (RT/LT/LX/LY) yang mau di-tuning, terus a
 | **Hysteresis** | Mekanisme deadzone dengan dua ambang batas beda buat naik (`Threshold Up`) dan turun (`Threshold Down`) — biar sinyal nggak "ngeblip" bolak-balik pas nilainya lagi pas-pasan di sekitar titik deadzone. |
 | **Threshold Up** | Nilai mentah harus lewat ini dulu baru output mulai dianggap "aktif" (di atas 0). |
 | **Threshold Down** | Nilai mentah harus turun di bawah ini baru output balik ke 0. Selalu lebih kecil dari Threshold Up. |
+| **Vibration (RT/LT)** | Ngirim efek getar langsung ke controller fisik. Pilih mode **Proportional** (getaran dinamis ngikutin dalamnya trigger) atau **Static** (getaran konstan rata begitu aktif). Bisa diarahin ke motor **High Freq (Kanan)** atau **Low Freq (Kiri)**. |
 | **Output Mode** | Sinyal hasil olahan mau dikirim ke mana: **Xbox 360 (ViGEm)** atau **vJoy**. |
 | **Start/Stop Pipeline** | Nyala/matiin proses baca-olah-tulis. Controller virtual cuma muncul selama pipeline-nya jalan. |
 | **Rate** | Kecepatan loop pemrosesan (target ~250Hz) — ini indikator kesehatan performa pipeline, bukan performa render UI. |
 
-Toggle smoothing/hysteresis bisa dimatiin sendiri-sendiri per axis, jadi bisa A/B testing feel-nya langsung di game.
+Toggle smoothing, hysteresis, dan vibration bisa diatur sendiri-sendiri per axis, jadi bisa A/B testing feel-nya langsung di game.
 
 ## Requirements
 

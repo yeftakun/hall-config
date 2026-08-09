@@ -63,11 +63,12 @@ Open HallConfig, pick the **Axis Source** (RT/LT/LX/LY) you want to tune, then a
 | **Hysteresis** | A deadzone mechanism with two separate thresholds for rising (`Threshold Up`) and falling (`Threshold Down`) — prevents the signal from "blipping" back and forth when it hovers right around the deadzone point. |
 | **Threshold Up** | The raw value must cross this before output starts being considered "active" (above 0). |
 | **Threshold Down** | The raw value must drop below this for output to return to 0. Always lower than Threshold Up. |
+| **Vibration (RT/LT)** | Route rumble feedback directly to the physical controller. Pick between **Proportional** (dynamic intensity based on trigger depth) or **Static** (constant max intensity once active). Map to either the **High Freq (Right)** or **Low Freq (Left)** motor. |
 | **Output Mode** | Where the processed signal goes: **Xbox 360 (ViGEm)** or **vJoy**. |
 | **Start/Stop Pipeline** | Turns the read-process-write loop on/off. The virtual controller only exists while the pipeline is running. |
 | **Rate** | Processing loop speed (target ~250Hz) — a performance health indicator, not a UI render rate. |
 
-Smoothing and hysteresis can each be toggled independently per axis, so you can A/B test the feel directly in-game.
+Smoothing, hysteresis, and vibration can each be toggled independently per axis, so you can A/B test the feel directly in-game.
 
 ## Requirements
 
