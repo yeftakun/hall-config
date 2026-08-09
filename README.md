@@ -1,5 +1,9 @@
 # HallConfig
 
+![GitHub release](https://img.shields.io/github/v/release/yeftakun/hall-config)
+![License](https://img.shields.io/github/license/yeftakun/hall-config)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue)
+
 [ID](/README-ID.md) | EN
 
 **Smoother Inputs. Cleaner Control.**
