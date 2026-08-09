@@ -21,6 +21,7 @@ public class TrayService : IDisposable
     private readonly ToolStripMenuItem _runOnStartupItem;
     private readonly ToolStripMenuItem _startMinimizedItem;
     private readonly ToolStripMenuItem _minimizeOnCloseItem;
+    private readonly ToolStripMenuItem _autoCheckUpdatesItem;
     private bool _disposed;
 
     public TrayService(MainViewModel viewModel, Window mainWindow)
@@ -98,9 +99,17 @@ public class TrayService : IDisposable
         _minimizeOnCloseItem.Click += OnMinimizeOnCloseToggled;
         contextMenu.Items.Add(_minimizeOnCloseItem);
 
+        _autoCheckUpdatesItem = new ToolStripMenuItem("Auto-check for updates on startup")
+        {
+            CheckOnClick = true,
+            Checked = _viewModel.AppConfig.AutoCheckUpdates
+        };
+        _autoCheckUpdatesItem.Click += OnAutoCheckUpdatesToggled;
+        contextMenu.Items.Add(_autoCheckUpdatesItem);
+
         contextMenu.Items.Add(new ToolStripSeparator());
 
-        var aboutItem = new ToolStripMenuItem("About HallConfig...");
+        var aboutItem = new ToolStripMenuItem("About");
         aboutItem.Click += (s, e) => ShowAboutWindow();
         contextMenu.Items.Add(aboutItem);
 
@@ -157,11 +166,7 @@ public class TrayService : IDisposable
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            var about = new AboutWindow
-            {
-                Owner = _mainWindow.IsVisible ? _mainWindow : null
-            };
-            about.ShowDialog();
+            AboutWindow.ShowWindow(_mainWindow.IsVisible ? _mainWindow : null);
         });
     }
 
@@ -186,6 +191,12 @@ public class TrayService : IDisposable
     private void OnMinimizeOnCloseToggled(object? sender, EventArgs e)
     {
         _viewModel.AppConfig.MinimizeToTrayOnClose = _minimizeOnCloseItem.Checked;
+        _viewModel.SaveConfigCommand.Execute(null);
+    }
+
+    private void OnAutoCheckUpdatesToggled(object? sender, EventArgs e)
+    {
+        _viewModel.AppConfig.AutoCheckUpdates = _autoCheckUpdatesItem.Checked;
         _viewModel.SaveConfigCommand.Execute(null);
     }
 

@@ -18,6 +18,7 @@ public class AppConfig
     public bool RunOnStartup { get; set; } = false;
     public bool StartMinimized { get; set; } = false;
     public bool MinimizeToTrayOnClose { get; set; } = true;
+    public bool AutoCheckUpdates { get; set; } = true;
 
     /// <summary>
     /// Global/legacy smoothing config. Used as default when an axis doesn't have an

@@ -71,11 +71,7 @@ internal class Program
 
         using var engine = new PipelineEngine(config);
 
-        // Enable file-based debug log (never writes to Console from worker thread)
-        engine.EnableDebugLog();
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"Debug log: {engine.DebugLogPath}");
-        Console.ResetColor();
+        // Debug logging is handled internally by Logger
 
         // StatusMessage is only fired from the main Start() path now (not WorkerLoop)
         engine.StatusMessage += (msg) =>
@@ -85,14 +81,7 @@ internal class Program
             Console.ResetColor();
         };
 
-        if (!engine.Output.IsVJoyEnabled())
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("[ERROR] Driver vJoy tidak aktif atau belum terinstall di Windows!");
-            Console.ResetColor();
-            Console.WriteLine("Pastikan driver vJoy sudah terinstall dan minimal Device #1 aktif via vJoyConf.");
-            return;
-        }
+        // IsVJoyEnabled check removed, handled inside Acquire if VJoyOutput is used.
 
         Console.WriteLine($"Acquiring vJoy Device #{config.VJoyDeviceId} (Axis {config.VJoyAxis})...");
         if (!engine.Output.Acquire())
@@ -105,7 +94,7 @@ internal class Program
         }
 
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"[SUCCESS] vJoy Device #{config.VJoyDeviceId} acquired! (Min={engine.Output.AxisMin}, Max={engine.Output.AxisMax})");
+        Console.WriteLine($"[SUCCESS] Virtual Device acquired!");
         Console.ResetColor();
 
         Console.WriteLine("Memulai pipeline polling loop 250Hz...\n");

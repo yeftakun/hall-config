@@ -65,6 +65,7 @@ public class VJoyOutput : IOutputDevice
     {
         if (!IsVJoyEnabled())
         {
+            Logger.Warn("VJoyOutput", "vJoy driver is not enabled or not installed.");
             return false;
         }
 
@@ -76,15 +77,21 @@ public class VJoyOutput : IOutputDevice
         else if (status == VjdStat.VJD_STAT_FREE)
         {
             _isAcquired = _joystick.AcquireVJD(_deviceId);
+            if (!_isAcquired)
+            {
+                Logger.Error("VJoyOutput", $"Failed to acquire vJoy Device #{_deviceId}. Status was FREE but acquire rejected.");
+            }
         }
         else
         {
+            Logger.Warn("VJoyOutput", $"Cannot acquire vJoy Device #{_deviceId}. Status: {status}");
             _isAcquired = false;
             return false;
         }
 
         if (_isAcquired)
         {
+            Logger.Info("VJoyOutput", $"Acquired vJoy Device #{_deviceId}");
             // Cache button and POV capabilities
             try
             {
@@ -282,8 +289,12 @@ public class VJoyOutput : IOutputDevice
             try
             {
                 _joystick.RelinquishVJD(_deviceId);
+                Logger.Info("VJoyOutput", $"Released vJoy Device #{_deviceId}");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.Error("VJoyOutput", $"Error relinquishing vJoy Device #{_deviceId}", ex);
+            }
             _isAcquired = false;
         }
     }

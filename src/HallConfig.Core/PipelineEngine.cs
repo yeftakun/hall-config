@@ -23,10 +23,6 @@ public class PipelineEngine : IDisposable
     // Internal rate counter — incremented by the worker, read atomically by any thread.
     private long _workerIterationCount;
 
-    private string? _debugLogPath;
-    private StreamWriter? _debugLog;
-    private readonly object _logLock = new();
-
     public event Action<AxisSample>? SampleProcessed;
     public event Action<MultiAxisSample>? MultiAxisSampleProcessed;
     public event Action<string>? StatusMessage;
@@ -37,7 +33,6 @@ public class PipelineEngine : IDisposable
     public SignalProcessor Processor => GetOrCreateProcessor(_config.AxisSource);
     public InputReader Reader => _inputReader;
     public IOutputDevice Output => _outputDevice;
-    public string? DebugLogPath => _debugLogPath;
 
     /// <summary>
     /// Atomically reads and returns the total number of worker loop iterations since Start().
@@ -76,37 +71,6 @@ public class PipelineEngine : IDisposable
 
     private SignalProcessor GetOrCreateProcessor(string axisSource) =>
         _processors.GetOrAdd(axisSource, _ => new SignalProcessor());
-
-    public void EnableDebugLog(string? path = null)
-    {
-        try
-        {
-            _debugLogPath = path ?? Path.Combine(
-                AppContext.BaseDirectory,
-                $"hallconfig-debug-{DateTime.Now:yyyyMMdd-HHmmss}.log");
-
-            _debugLog = new StreamWriter(_debugLogPath, append: false) { AutoFlush = true };
-            _debugLog.WriteLine($"=== HallConfig Debug Log Started: {DateTime.Now:O} ===");
-            _debugLog.WriteLine($"    PID: {Environment.ProcessId}, Thread: {Environment.CurrentManagedThreadId}");
-            _debugLog.WriteLine();
-        }
-        catch
-        {
-            _debugLog = null;
-        }
-    }
-
-    private void WriteLog(string message)
-    {
-        lock (_logLock)
-        {
-            try
-            {
-                _debugLog?.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {message}");
-            }
-            catch { }
-        }
-    }
 
     public void UpdateConfig(AppConfig newConfig)
     {
@@ -198,6 +162,7 @@ public class PipelineEngine : IDisposable
         double stopwatchFrequency = Stopwatch.Frequency;
 
         long loopIteration = 0;
+        long lastLoopIteration = 0;
         long lastHeartbeatMs = 0;
 
         // Separate per-category error timestamps to prevent one error suppressing another
@@ -206,8 +171,7 @@ public class PipelineEngine : IDisposable
         long lastSampleErrorMs = -5000;
         long lastUnhandledMs = -5000;
 
-        WriteLog($"WorkerLoop starting. ThreadId={Environment.CurrentManagedThreadId}, " +
-                 $"TargetHz={_config.PollingHz}, InitialAxisSource={_config.AxisSource}, OutputMode={_config.OutputMode}");
+        Logger.Info("Pipeline", $"Started. OutputMode={_config.OutputMode}, TargetRate={_config.PollingHz}Hz");
 
         while (_isRunning)
         {
@@ -232,7 +196,7 @@ public class PipelineEngine : IDisposable
                     if (now - lastReadErrorMs > 1000)
                     {
                         lastReadErrorMs = now;
-                        WriteLog($"[EXCEPTION ReadAllInputs] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                        Logger.Error("WorkerLoop", "Exception in ReadAllInputs", ex);
                     }
                 }
 
@@ -284,7 +248,7 @@ public class PipelineEngine : IDisposable
                         if (now - lastOutputErrorMs > 1000)
                         {
                             lastOutputErrorMs = now;
-                            WriteLog($"[EXCEPTION UpdateFullState] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                            Logger.Error("WorkerLoop", "Exception in UpdateFullState", ex);
                         }
                     }
                 } 
@@ -310,18 +274,22 @@ public class PipelineEngine : IDisposable
                     if (now - lastSampleErrorMs > 1000)
                     {
                         lastSampleErrorMs = now;
-                        WriteLog($"[EXCEPTION SampleProcessed] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                        Logger.Error("WorkerLoop", "Exception in SampleProcessed event", ex);
                     }
                 }
 
-                // --- Heartbeat to log file only (never StatusMessage to avoid Console race) ---
+                // --- 30s Pipeline Rate Monitor to log file ---
                 long nowMs = sw.ElapsedMilliseconds;
-                if (nowMs - lastHeartbeatMs >= 1000)
+                if (nowMs - lastHeartbeatMs >= 30000)
                 {
+                    long elapsedMs = nowMs - lastHeartbeatMs;
                     lastHeartbeatMs = nowMs;
-                    WriteLog($"[HEARTBEAT] Iter={loopIteration}, Hz={_config.PollingHz}, Raw={selectedRaw:F4}, Out={selectedProcessed:F4}, " +
-                             $"Axis={axisSource}, ProcessorCount={_processors.Count}, " +
-                             $"Device={_outputDevice.Name}, OutputAcq={_outputDevice.IsAcquired}, GamepadConn={_inputReader.IsGamepadConnected}");
+                    
+                    long iterationsDiff = loopIteration - lastLoopIteration;
+                    lastLoopIteration = loopIteration;
+
+                    double hz = (iterationsDiff * 1000.0) / Math.Max(1, elapsedMs);
+                    Logger.Info("RateMonitor", $"Current rate: {hz:F1}Hz (target {_config.PollingHz}Hz). Device={_outputDevice.Name}, Acquired={_outputDevice.IsAcquired}, GamepadConn={_inputReader.IsGamepadConnected}");
                 }
 
                 // --- Precise timing ---
@@ -351,13 +319,13 @@ public class PipelineEngine : IDisposable
                 if (now - lastUnhandledMs > 1000)
                 {
                     lastUnhandledMs = now;
-                    WriteLog($"[UNHANDLED EXCEPTION in WorkerLoop] {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+                    Logger.Error("WorkerLoop", "Unhandled EXCEPTION", ex);
                 }
                 Thread.Sleep(10);
             }
         }
 
-        WriteLog($"WorkerLoop stopped. Total iterations: {loopIteration}");
+        Logger.Info("Pipeline", $"Stopped. Total iterations: {loopIteration}");
     }
 
     public void Dispose()
@@ -367,17 +335,6 @@ public class PipelineEngine : IDisposable
             Stop();
             _outputDevice.Dispose();
             _inputReader.Dispose();
-
-            lock (_logLock)
-            {
-                try
-                {
-                    _debugLog?.WriteLine($"\n=== HallConfig Debug Log Ended: {DateTime.Now:O} ===");
-                    _debugLog?.Dispose();
-                    _debugLog = null;
-                }
-                catch { }
-            }
 
             _disposed = true;
         }

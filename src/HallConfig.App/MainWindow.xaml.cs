@@ -56,7 +56,7 @@ public partial class MainWindow : Window
 
     private void AboutButton_Click(object sender, RoutedEventArgs e)
     {
-        _trayService.ShowAboutWindow();
+        AboutWindow.ShowWindow(this);
     }
 
     public void ForceClose()

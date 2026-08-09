@@ -60,17 +60,19 @@ public class ConfigStore
                 {
                     // Migrate old format (no axisConfigs) and fill missing axes.
                     EnsureAxisConfigsPopulated(parsed);
+                    Logger.Info("ConfigStore", $"Successfully loaded config from: {FilePath}");
                     return parsed;
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // fall through to default
+            Logger.Error("ConfigStore", $"Failed to load config from {FilePath}, creating default", ex);
         }
 
         var defaultConfig = CreateDefault();
         Save(defaultConfig);
+        Logger.Info("ConfigStore", "Created and saved default config.");
         return defaultConfig;
     }
 
@@ -78,12 +80,20 @@ public class ConfigStore
     {
         ArgumentNullException.ThrowIfNull(config);
 
-        string? dir = Path.GetDirectoryName(FilePath);
-        if (!string.IsNullOrWhiteSpace(dir) && !Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
+        try
+        {
+            string? dir = Path.GetDirectoryName(FilePath);
+            if (!string.IsNullOrWhiteSpace(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
-        string json = JsonSerializer.Serialize(config, JsonOptions);
-        File.WriteAllText(FilePath, json);
+            string json = JsonSerializer.Serialize(config, JsonOptions);
+            File.WriteAllText(FilePath, json);
+            Logger.Info("ConfigStore", $"Successfully saved config to: {FilePath}");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("ConfigStore", $"Failed to save config to {FilePath}", ex);
+        }
     }
 
     // ─── Internal helpers ─────────────────────────────────────────────────────

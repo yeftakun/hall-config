@@ -30,7 +30,7 @@
             </StackPanel>
 
             <!-- Catchy Tagline -->
-            <TextBlock Text="Smoother Inputs. Cleaner Trailbraking."
+            <TextBlock Text="Smoother Inputs. Clean Control."
                        FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF"
                        HorizontalAlignment="Center" Margin="0,0,0,3" TextAlignment="Center"/>
 
@@ -52,6 +52,33 @@
                     </DockPanel>
                 </StackPanel>
             </Border>
+
+            <!-- Update Checker -->
+            <StackPanel Margin="0,8,0,0" HorizontalAlignment="Center">
+                <Button x:Name="CheckUpdateButton" Content="Check for Update" Width="200" Height="28" Click="CheckUpdate_Click"
+                        Background="#21262D" Foreground="#C9D1D9" FontWeight="Medium" FontSize="11"
+                        BorderThickness="1" BorderBrush="#30363D" Cursor="Hand">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#30363D"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.6"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <TextBlock x:Name="UpdateStatusText" FontSize="11" Foreground="#8B949E" HorizontalAlignment="Center" Margin="0,6,0,0" Visibility="Collapsed"/>
+            </StackPanel>
         </StackPanel>
 
         <!-- Footer Area: Subtle Credits, GitHub Link, and Close Button -->
@@ -74,26 +101,48 @@
                 </TextBlock>
             </StackPanel>
 
-            <!-- Close Button -->
-            <Button Grid.Column="1" Content="Close" Width="72" Height="28" Click="CloseButton_Click"
-                    Background="#21262D" Foreground="#C9D1D9" FontWeight="Medium" FontSize="12"
-                    BorderThickness="1" BorderBrush="#30363D" Cursor="Hand" VerticalAlignment="Center">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="6"/>
-                    </Style>
-                </Button.Resources>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#30363D"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <!-- Buttons: Open Logs & Close -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Open Logs" Width="82" Height="28" Click="OpenLogsButton_Click" Margin="0,0,8,0"
+                        Background="Transparent" Foreground="#8B949E" FontWeight="Medium" FontSize="11"
+                        BorderThickness="1" BorderBrush="#30363D" Cursor="Hand" VerticalAlignment="Center">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#21262D"/>
+                                    <Setter Property="Foreground" Value="#C9D1D9"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Content="Close" Width="72" Height="28" Click="CloseButton_Click"
+                        Background="#21262D" Foreground="#C9D1D9" FontWeight="Medium" FontSize="12"
+                        BorderThickness="1" BorderBrush="#30363D" Cursor="Hand" VerticalAlignment="Center">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#30363D"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

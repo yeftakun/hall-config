@@ -33,11 +33,13 @@ public class Xbox360Output : IOutputDevice
                 _controller = _client.CreateXbox360Controller();
                 _controller.Connect();
                 _isAcquired = true;
+                Logger.Info("Xbox360Output", "Acquired Virtual Xbox 360 Controller");
                 ResetToCenter();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error("Xbox360Output", "Failed to acquire Virtual Xbox 360 Controller", ex);
                 Relinquish();
                 return false;
             }
@@ -69,6 +71,10 @@ public class Xbox360Output : IOutputDevice
                 _client = null;
             }
 
+            if (_isAcquired)
+            {
+                Logger.Info("Xbox360Output", "Released Virtual Xbox 360 Controller");
+            }
             _isAcquired = false;
         }
     }

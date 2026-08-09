@@ -31,6 +31,10 @@ public class InputReader : IDisposable
             int nowCount = ConnectedGamepadsCount;
             if (nowCount != _lastConnectedCount)
             {
+                if (nowCount == 0 && _lastConnectedCount >= 0)
+                {
+                    Logger.Warn("InputReader", $"Controller disconnected. UserIndex={deviceIndex}");
+                }
                 _lastConnectedCount = nowCount;
                 GamepadCountChanged?.Invoke(nowCount);
             }
@@ -39,6 +43,10 @@ public class InputReader : IDisposable
 
         if (_lastConnectedCount != 1)
         {
+            if (_lastConnectedCount <= 0)
+            {
+                Logger.Info("InputReader", $"Controller connected. UserIndex={deviceIndex}");
+            }
             _lastConnectedCount = 1;
             GamepadCountChanged?.Invoke(1);
         }
@@ -72,6 +80,10 @@ public class InputReader : IDisposable
             int nowCount = ConnectedGamepadsCount;
             if (nowCount != _lastConnectedCount)
             {
+                if (nowCount == 0 && _lastConnectedCount >= 0)
+                {
+                    Logger.Warn("InputReader", $"Controller disconnected. UserIndex={deviceIndex}");
+                }
                 _lastConnectedCount = nowCount;
                 GamepadCountChanged?.Invoke(nowCount);
             }
@@ -82,6 +94,10 @@ public class InputReader : IDisposable
 
         if (_lastConnectedCount != 1)
         {
+            if (_lastConnectedCount <= 0)
+            {
+                Logger.Info("InputReader", $"Controller connected. UserIndex={deviceIndex}");
+            }
             _lastConnectedCount = 1;
             GamepadCountChanged?.Invoke(1);
         }
@@ -110,6 +126,10 @@ public class InputReader : IDisposable
             int nowCount = ConnectedGamepadsCount;
             if (nowCount != _lastConnectedCount)
             {
+                if (nowCount == 0 && _lastConnectedCount >= 0)
+                {
+                    Logger.Warn("InputReader", $"Controller disconnected. UserIndex={deviceIndex}");
+                }
                 _lastConnectedCount = nowCount;
                 GamepadCountChanged?.Invoke(nowCount);
             }
@@ -122,6 +142,10 @@ public class InputReader : IDisposable
 
         if (_lastConnectedCount != 1)
         {
+            if (_lastConnectedCount <= 0)
+            {
+                Logger.Info("InputReader", $"Controller connected. UserIndex={deviceIndex}");
+            }
             _lastConnectedCount = 1;
             GamepadCountChanged?.Invoke(1);
         }
