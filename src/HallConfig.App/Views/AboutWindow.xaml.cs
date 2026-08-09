@@ -31,6 +31,12 @@ public partial class AboutWindow : Window
     public AboutWindow()
     {
         InitializeComponent();
+        
+        var lastResult = HallConfig.Core.UpdateChecker.LastCheckResult;
+        if (lastResult != null && !lastResult.IsError && lastResult.HasUpdate)
+        {
+            UpdateUIWithResult(lastResult);
+        }
     }
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -63,7 +69,11 @@ public partial class AboutWindow : Window
         UpdateStatusText.Visibility = Visibility.Collapsed;
 
         var result = await HallConfig.Core.UpdateChecker.CheckForUpdatesAsync();
+        UpdateUIWithResult(result);
+    }
 
+    private void UpdateUIWithResult(HallConfig.Core.UpdateCheckResult result)
+    {
         if (result.IsError)
         {
             CheckUpdateButton.Content = "Check for Update";

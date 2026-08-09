@@ -9,6 +9,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <Version>1.2.0</Version>
     
     <!-- Single-file self-contained publish configuration -->
     <PublishSingleFile>true</PublishSingleFile>

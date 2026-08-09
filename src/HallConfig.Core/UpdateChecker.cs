@@ -21,6 +21,8 @@ public static class UpdateChecker
     private const string RepoUrl = "https://api.github.com/repos/yeftakun/hall-config/releases/latest";
     private static readonly HttpClient _httpClient = new();
 
+    public static UpdateCheckResult? LastCheckResult { get; private set; }
+
     static UpdateChecker()
     {
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("HallConfig", GetCurrentVersionString()));
@@ -96,6 +98,7 @@ public static class UpdateChecker
             result.IsError = true;
         }
 
+        LastCheckResult = result;
         return result;
     }
 }
