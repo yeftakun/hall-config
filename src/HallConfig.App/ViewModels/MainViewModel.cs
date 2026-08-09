@@ -154,6 +154,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         {
             IsControllerConnected = connected;
             ControllerStatus = connected ? "PAD#0: Connected" : "No Controller Detected";
+            IsVibrationSupported = connected && XInputHelper.SupportsVibration(_appConfig.DeviceIndex);
         }
     }
 
@@ -172,6 +173,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         }
         OnPropertyChanged(nameof(SelectedAxisTitle));
         OnPropertyChanged(nameof(SelectedAxisSubtitle));
+        OnPropertyChanged(nameof(ShowRTVibrationToggle));
+        OnPropertyChanged(nameof(ShowLTVibrationToggle));
     }
 
     private void RefreshCardSubtitles()
@@ -232,6 +235,13 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         get => _controllerStatus;
         private set => SetField(ref _controllerStatus, value);
+    }
+
+    private bool _isVibrationSupported;
+    public bool IsVibrationSupported
+    {
+        get => _isVibrationSupported;
+        private set => SetField(ref _isVibrationSupported, value);
     }
 
     public string PipelineRateText => IsPipelineRunning ? $"{_displayedRate} Hz" : "— Hz";
@@ -503,8 +513,87 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
             if (wasRunning) TogglePipeline();
             StatusMessage = "Config loaded.";
+            
+            OnPropertyChanged(nameof(RTVibrationEnabled));
+            OnPropertyChanged(nameof(LTVibrationEnabled));
+            OnPropertyChanged(nameof(MaxVibrationPercent));
+            OnPropertyChanged(nameof(RTVibrationMotorIndex));
+            OnPropertyChanged(nameof(LTVibrationMotorIndex));
         }
         catch (Exception ex) { StatusMessage = $"Load error: {ex.Message}"; }
+    }
+
+    // ─── Vibration Config Properties ──────────────────────────────────────────
+
+    public bool ShowRTVibrationToggle => string.Equals(_selectedAxisSource, "RightTrigger", StringComparison.OrdinalIgnoreCase);
+    public bool ShowLTVibrationToggle => string.Equals(_selectedAxisSource, "LeftTrigger", StringComparison.OrdinalIgnoreCase);
+
+    public bool RTVibrationEnabled
+    {
+        get => _appConfig.RTVibrationEnabled;
+        set
+        {
+            if (_appConfig.RTVibrationEnabled != value)
+            {
+                _appConfig.RTVibrationEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool LTVibrationEnabled
+    {
+        get => _appConfig.LTVibrationEnabled;
+        set
+        {
+            if (_appConfig.LTVibrationEnabled != value)
+            {
+                _appConfig.LTVibrationEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double MaxVibrationPercent
+    {
+        get => _appConfig.MaxVibrationPercent;
+        set
+        {
+            int clamped = (int)Math.Clamp(value, 0, 100);
+            if (_appConfig.MaxVibrationPercent != clamped)
+            {
+                _appConfig.MaxVibrationPercent = clamped;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int RTVibrationMotorIndex
+    {
+        get => _appConfig.RTVibrationMotor == "LowFreq" ? 0 : 1;
+        set
+        {
+            string newMotor = value == 0 ? "LowFreq" : "HighFreq";
+            if (_appConfig.RTVibrationMotor != newMotor)
+            {
+                _appConfig.RTVibrationMotor = newMotor;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int LTVibrationMotorIndex
+    {
+        get => _appConfig.LTVibrationMotor == "LowFreq" ? 0 : 1;
+        set
+        {
+            string newMotor = value == 0 ? "LowFreq" : "HighFreq";
+            if (_appConfig.LTVibrationMotor != newMotor)
+            {
+                _appConfig.LTVibrationMotor = newMotor;
+                OnPropertyChanged();
+            }
+        }
     }
 
     // ─── INotifyPropertyChanged ───────────────────────────────────────────────

@@ -20,6 +20,13 @@ public class AppConfig
     public bool MinimizeToTrayOnClose { get; set; } = true;
     public bool AutoCheckUpdates { get; set; } = true;
 
+    // ─── Vibration Feedback (PLAN2.md §6) ─────────────────────────────────────
+    public bool RTVibrationEnabled { get; set; } = false;
+    public string RTVibrationMotor { get; set; } = "HighFreq"; // "HighFreq" (Right) or "LowFreq" (Left)
+    public bool LTVibrationEnabled { get; set; } = false;
+    public string LTVibrationMotor { get; set; } = "LowFreq";
+    public int MaxVibrationPercent { get; set; } = 80;
+
     /// <summary>
     /// Global/legacy smoothing config. Used as default when an axis doesn't have an
     /// entry in AxisConfigs yet, and kept for DevConsole hotkey backward compat.

@@ -10,6 +10,7 @@
         Foreground="#E6EDF3">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
         <!-- ── Toggle Switch ──────────────────────────────────────────── -->
         <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
@@ -343,6 +344,110 @@
                             Value="{Binding ThresholdDown, Mode=TwoWay}"
                             Margin="0,4,0,12"/>
                     <Separator/>
+
+                    <!-- Vibration Feedback -->
+                    <Grid Margin="0,6,0,4">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowRTVibrationToggle}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ShowLTVibrationToggle}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="VIBRATION FEEDBACK" Style="{StaticResource SectionLabel}" Margin="0"/>
+                            <TextBlock Text="Physical Trigger Rumble Motor" FontSize="10" Foreground="#6E7681" Margin="0,0,0,8"/>
+                            <TextBlock Text="⚠️ Controller hardware doesn't support vibration" FontSize="10" Foreground="#FFA657" Margin="0,0,0,8">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding IsControllerConnected}" Value="True" />
+                                                    <Condition Binding="{Binding IsVibrationSupported}" Value="False" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Toggles -->
+                        <Grid Grid.Row="1" Margin="0,0,0,8" IsEnabled="{Binding IsVibrationSupported}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- RT -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Enable RT Vibration" FontSize="12" Foreground="#C9D1D9" VerticalAlignment="Center" Visibility="{Binding ShowRTVibrationToggle, Converter={StaticResource BoolToVis}}"/>
+                            <ToggleButton Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding RTVibrationEnabled, Mode=TwoWay}" Visibility="{Binding ShowRTVibrationToggle, Converter={StaticResource BoolToVis}}"/>
+                            <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" SelectedIndex="{Binding RTVibrationMotorIndex}" Margin="0,8,0,0" Visibility="{Binding ShowRTVibrationToggle, Converter={StaticResource BoolToVis}}">
+                                <ComboBoxItem Content="Low Freq (Left Motor)"/>
+                                <ComboBoxItem Content="High Freq (Right Motor)"/>
+                            </ComboBox>
+                            
+                            <!-- LT -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Enable LT Vibration" FontSize="12" Foreground="#C9D1D9" VerticalAlignment="Center" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}"/>
+                            <ToggleButton Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding LTVibrationEnabled, Mode=TwoWay}" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}"/>
+                            <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" SelectedIndex="{Binding LTVibrationMotorIndex}" Margin="0,8,0,0" Visibility="{Binding ShowLTVibrationToggle, Converter={StaticResource BoolToVis}}">
+                                <ComboBoxItem Content="Low Freq (Left Motor)"/>
+                                <ComboBoxItem Content="High Freq (Right Motor)"/>
+                            </ComboBox>
+                        </Grid>
+                        
+                        <!-- Max Intensity -->
+                        <Grid Grid.Row="2" IsEnabled="{Binding IsVibrationSupported}" Margin="0,0,0,12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0" Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Max Intensity" Grid.Column="0" FontSize="12" Foreground="#C9D1D9" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Foreground="#58A6FF" FontSize="12" Text="{Binding MaxVibrationPercent, StringFormat={}{0}%}" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Slider Grid.Row="1" Style="{StaticResource DarkSliderStyle}" Minimum="0" Maximum="100" SmallChange="1" LargeChange="10" Value="{Binding MaxVibrationPercent, Mode=TwoWay}" Margin="0,4,0,0"/>
+                        </Grid>
+                    </Grid>
+                    
+                    <Separator>
+                        <Separator.Style>
+                            <Style TargetType="Separator" BasedOn="{StaticResource {x:Type Separator}}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowRTVibrationToggle}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ShowLTVibrationToggle}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Separator.Style>
+                    </Separator>
 
                     <!-- Save / Load -->
                     <Grid Margin="0,10,0,0">

@@ -94,7 +94,11 @@ Sudah "solved sendiri" via restart laptop (bukan restart app) — ini justru sin
 - Berlaku di KEDUA mode output (vJoy maupun Xbox360) — vibration selalu ditulis ke controller FISIK lewat XInput, independen dari mode output yang dipilih untuk sinyal game.
 
 ### Mapping Motor
-XInput cuma punya 2 motor: `LeftMotorSpeed` (motor besar/frekuensi rendah) dan `RightMotorSpeed` (motor kecil/frekuensi tinggi). Konvensi yang disarankan: **LT → Left Motor**, **RT → Right Motor** (cocok posisi fisik kiri-kanan di controller).
+XInput cuma punya 2 motor: `LeftMotorSpeed` (motor besar/frekuensi rendah) dan `RightMotorSpeed` (motor kecil/frekuensi tinggi).
+
+**User-selectable per axis** — bukan mapping tetap. Tiap axis (RT, LT) punya pilihan sendiri: motor mana yang dia gerakkan — Low Freq (Left Motor) atau High Freq (Right Motor). Default awal: LT → Low Freq, RT → High Freq (tetap disaranin sebagai default, tapi bisa diganti user).
+
+**Resolusi konflik:** kalau RT dan LT kebetulan dipilih ke motor YANG SAMA, nilai motor itu = `MAX(nilai_axis_1, nilai_axis_2)` — bukan dijumlah/dirata-rata, supaya getaran tetap jelas terasa dan tidak "encer".
 
 ### Implementasi
 - Nilai motor = `ProcessedOutput × (MaxVibrationPercent / 100) × 65535` (batas atas ushort XInput).

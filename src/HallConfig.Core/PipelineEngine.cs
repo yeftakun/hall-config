@@ -18,7 +18,12 @@ public class PipelineEngine : IDisposable
 
     private Thread? _workerThread;
     private volatile bool _isRunning;
+    private Thread? _vibrationThread;
+    private volatile bool _vibrationRunning;
     private bool _disposed;
+
+    private volatile float _lastProcessedRT;
+    private volatile float _lastProcessedLT;
 
     // Internal rate counter — incremented by the worker, read atomically by any thread.
     private long _workerIterationCount;
@@ -132,6 +137,15 @@ public class PipelineEngine : IDisposable
             Priority     = ThreadPriority.AboveNormal
         };
         _workerThread.Start();
+
+        _vibrationRunning = true;
+        _vibrationThread = new Thread(VibrationLoop)
+        {
+            IsBackground = true,
+            Name         = "HallConfig.VibrationWorker",
+            Priority     = ThreadPriority.Normal
+        };
+        _vibrationThread.Start();
         return true;
     }
 
@@ -143,10 +157,18 @@ public class PipelineEngine : IDisposable
         }
 
         _isRunning = false;
+        _vibrationRunning = false;
+
         if (_workerThread != null && _workerThread.IsAlive)
         {
             _workerThread.Join(500);
             _workerThread = null;
+        }
+
+        if (_vibrationThread != null && _vibrationThread.IsAlive)
+        {
+            _vibrationThread.Join(500);
+            _vibrationThread = null;
         }
 
         if (_outputDevice.IsAcquired)
@@ -210,6 +232,9 @@ public class PipelineEngine : IDisposable
                 float processedLT = procLT.Process(rawLT, _config.GetAxisConfig("LeftTrigger").ToProcessorConfig());
                 float processedLX = procLX.Process(rawLX, _config.GetAxisConfig("LeftStickX").ToProcessorConfig());
                 float processedLY = procLY.Process(rawLY, _config.GetAxisConfig("LeftStickY").ToProcessorConfig());
+
+                _lastProcessedRT = processedRT;
+                _lastProcessedLT = processedLT;
 
                 // Selected axis values for UI tuning HUD
                 string axisSource = _config.AxisSource;
@@ -326,6 +351,63 @@ public class PipelineEngine : IDisposable
         }
 
         Logger.Info("Pipeline", $"Stopped. Total iterations: {loopIteration}");
+    }
+
+    private void VibrationLoop()
+    {
+        Logger.Info("VibrationEngine", "Vibration loop started.");
+        int deviceIndex = _config.DeviceIndex;
+        bool supportsVibration = XInputHelper.SupportsVibration(deviceIndex);
+        
+        Logger.Info("VibrationEngine", $"Controller #{deviceIndex} supports vibration: {supportsVibration}");
+
+        while (_vibrationRunning)
+        {
+            try
+            {
+                // Only send vibration commands if the controller claims to support it
+                if (supportsVibration)
+                {
+                    float leftMotor = 0f;
+                    float rightMotor = 0f;
+                    
+                    float rtVal = _config.RTVibrationEnabled ? _lastProcessedRT * (_config.MaxVibrationPercent / 100f) : 0f;
+                    float ltVal = _config.LTVibrationEnabled ? _lastProcessedLT * (_config.MaxVibrationPercent / 100f) : 0f;
+
+                    if (_config.RTVibrationEnabled)
+                    {
+                        if (_config.RTVibrationMotor == "LowFreq")
+                            leftMotor = Math.Max(leftMotor, rtVal);
+                        else
+                            rightMotor = Math.Max(rightMotor, rtVal);
+                    }
+
+                    if (_config.LTVibrationEnabled)
+                    {
+                        if (_config.LTVibrationMotor == "LowFreq")
+                            leftMotor = Math.Max(leftMotor, ltVal);
+                        else
+                            rightMotor = Math.Max(rightMotor, ltVal);
+                    }
+                    
+                    XInputHelper.SetVibration(_config.DeviceIndex, leftMotor, rightMotor);
+                }
+            }
+            catch { }
+
+            Thread.Sleep(16); // ~60Hz
+        }
+
+        // Clean up vibration on stop
+        try
+        {
+            if (supportsVibration)
+            {
+                XInputHelper.SetVibration(_config.DeviceIndex, 0f, 0f);
+            }
+        }
+        catch { }
+        Logger.Info("VibrationEngine", "Vibration loop stopped.");
     }
 
     public void Dispose()
