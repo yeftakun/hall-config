@@ -10,21 +10,13 @@ Aplikasi desktop Windows buat memperhalus sinyal trigger/stick gamepad hall-effe
 
 ## Ini Apa?
 
+![problem](assets/problem.gif)
+
 Beberapa controller dengan trigger hall-effect punya deadzone (area buta) yang nggak stabil di rentang tekanan rendah (misal 0–20%), jadi input-nya kedip-kedip pas trailbraking. HallConfig baca sinyal mentah dari controller fisik, dibersihin, terus dikirim ke game lewat controller virtual — nggak perlu ganti hardware.
 
 ## Cara Kerjanya (Singkat)
 
-```
-Controller fisik (XInput)
-      ↓
-[Baca raw trigger/stick]
-      ↓
-[Signal Processor: Smoothing + Hysteresis Deadzone]
-      ↓
-[Output ke controller virtual: vJoy atau Xbox 360 (ViGEm)]
-      ↓
-Game (Assetto Corsa, dll)
-```
+![system](assets/system.webp)
 
 Tombol, D-pad, dan Right Stick diteruskan langsung apa adanya (*passthrough*) — nggak diproses. Yang diproses cuma axis yang emang butuh (trigger & left stick).
 

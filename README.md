@@ -10,21 +10,13 @@ A Windows desktop app that smooths out gamepad trigger/stick signals from hall-e
 
 ## What Is This?
 
+![problem](assets/problem.gif)
+
 Some hall-effect trigger controllers have a "blind"/unstable zone at low pressure ranges (e.g. 0–20%), causing input to blip/stutter during trailbraking. HallConfig reads that raw signal, cleans it up, and sends the result to your game through a virtual controller — no hardware replacement needed.
 
-## How It Works (Brief)
+## How It Works
 
-```
-Physical controller (XInput)
-      ↓
-[Read raw trigger/stick]
-      ↓
-[Signal Processor: Smoothing + Hysteresis Deadzone]
-      ↓
-[Output to virtual controller: vJoy or Xbox 360 (ViGEm)]
-      ↓
-Game (Assetto Corsa, etc.)
-```
+![system](assets/system.webp)
 
 Buttons, D-pad, and Right Stick are passed through directly (unprocessed) — signal processing only applies to the axes that need it (triggers & left stick).
 
