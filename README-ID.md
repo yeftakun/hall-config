@@ -30,6 +30,7 @@ Tombol, D-pad, dan Right Stick diteruskan langsung apa adanya (*passthrough*) �
 
 ## Fitur-Fitur Utama
 
+- **Vibration Feedback** — dukungan motor getar independen (RT/LT) langsung ke controller fisik tanpa delay, terisolasi 100% dari efek getar asli bawaan game. Mendukung profil Proportional dan Static.
 - **Dual output mode** — bisa output sebagai vJoy device atau virtual Xbox 360 controller (ViGEm). Xbox 360 lebih disaranin, soalnya kurva sensitivitas yang dibaca game terasa lebih natural dibanding vJoy.
 - **Config independen per axis** — Right Trigger, Left Trigger, Left Stick X/Y masing-masing punya setting smoothing & hysteresis sendiri-sendiri.
 - **Live monitoring** — ada grafik real-time raw vs output langsung di aplikasi pas lagi tuning.

@@ -30,6 +30,7 @@ Buttons, D-pad, and Right Stick are passed through directly (unprocessed) — si
 
 ## Key Features
 
+- **Vibration Feedback** — zero-latency rumble directly to your physical controller (RT/LT independent), completely isolated from game-generated rumble. Includes Proportional and Static intensity modes.
 - **Dual output mode** — output as a vJoy device or a virtual Xbox 360 controller (ViGEm). Xbox 360 is recommended, as the sensitivity curve games read from it tends to feel more natural than vJoy's.
 - **Per-axis independent config** — Right Trigger, Left Trigger, Left Stick X/Y each have their own smoothing and hysteresis settings.
 - **Live monitoring** — real-time raw vs. output graph right in the app while you tune.
