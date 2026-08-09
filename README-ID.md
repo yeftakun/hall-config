@@ -73,8 +73,6 @@ Windows 10/11, controller yang kompatibel XInput (Xbox 360/One/generic).
 
 Tanpa HidHide, controller fisik dan virtual bakal sama-sama kebaca game bersamaan (nggak bentrok kok, tapi bisa salah pilih pas bind axis) — cek bagian [Setup](#2-opsional-tapi-disaranin-install-hidhide) di atas.
 
-## License
-
 MIT — lihat [LICENSE](LICENSE).
 
 ---

@@ -73,8 +73,6 @@ Windows 10/11, an XInput-compatible controller (Xbox 360/One/generic).
 
 Without HidHide, both the physical and virtual controllers get read by the game at the same time (they don't conflict, but you can accidentally bind the wrong one) — see the [Setup](#2-optional-recommended-install-hidhide) section above.
 
-## License
-
 MIT — see [LICENSE](LICENSE).
 
 ---
